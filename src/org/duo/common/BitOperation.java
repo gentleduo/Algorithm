@@ -74,6 +74,6 @@ public class BitOperation {
         c = -5;
         System.out.println(~c + 1);
 
-        System.out.println(toBinary(-5));
+        System.out.println(toBinary(63));
     }
 }
