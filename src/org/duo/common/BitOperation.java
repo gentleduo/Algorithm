@@ -75,5 +75,13 @@ public class BitOperation {
         System.out.println(~c + 1);
 
         System.out.println(toBinary(63));
+        System.out.println(-4 >> 1);
+        System.out.println(Integer.MIN_VALUE);
+        System.out.println(toBinary(-2147483647));
+
+        System.out.println("===========================");
+        for (int i = 0; i <= 31; i++) {
+            System.out.println((-1 >> i) & 1);
+        }
     }
 }
