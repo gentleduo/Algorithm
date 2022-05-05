@@ -80,3 +80,72 @@ public static void swap(int[] arr, int i, int j) {
 }
 ```
 
+# 数组和链表
+
+## 数组
+
+便于寻址，不便于增删数据(要维持数组在内存中的连续性)
+
+## 链表
+
+便于增删数据，不便于寻址
+
+# 栈和队列
+
+栈和队列是逻辑上的概念，用链表和数组都可以实现
+
+## 栈
+
+数据先进后出
+
+## 队列
+
+数据先进先出
+
+# 哈希表和有序表
+
+## 哈希表
+
+增、删、查、改时间复杂度都是O(1)，只是这个常数操作的耗时会有点长； 当哈希表中的K,V是基本类型时，哈希表存储的是该基础类型的实际值，而当K,V是非基本类型的时候，哈希表存储的是对象的引用
+
+## 有序表
+
+比如 TreeMap；实现方式有：红黑树、avl、sb树、跳表；增删改查的时间复杂度为O(logN)
+
+# 递归
+
+## Master公式
+
+形如：T(N)=a*T(N/b) + O(N^d) 的递归函数，即：子问题规模一致的递归可以直接通过Master公式来确定时间复杂度
+
+如果log(b,a) < d，复杂度为O(N^d) 即：N的d次方
+
+如果log(b,a) > d，复杂度为O(N^log(b,a)) 即：N的log(b,a)次方
+
+如果log(b,a) == d，复杂度为O(N^d * logN) 即：N的d次方乘以log(2,N)
+
+其中的a、b、d都是常数
+
+比如通过递归求arr[L......R]范围中的最大值，相当于将问题分解为分别求0 ~ N/2中的最大值和N/2+1 ~ N-1中的最大值，然后再求这两个值的最大值，即T(N) = 2  * T(N / 2) + O (N^0) ，可以得到a=2，b=2，d=0，再通过master公式：因为log(2,2)>0，所以时间复杂度等于O(N^log(2,2))，即：O(N^1)，即：O(N)
+
+```java
+// 求arr中的最大值
+public static int getMax(int[] arr) {
+    return process(arr, 0, arr.length - 1);
+}
+
+// arr[L..R]范围上求最大值  L ... R   N
+public static int process(int[] arr, int L, int R) {
+    // arr[L..R]范围上只有一个数，直接返回，base case
+    if (L == R) { 
+        return arr[L];
+    }
+    // L...R 不只一个数
+    // mid = (L + R) / 2
+    int mid = L + ((R - L) >> 1); // 中点   	1
+    int leftMax = process(arr, L, mid);
+    int rightMax = process(arr, mid + 1, R);
+    return Math.max(leftMax, rightMax);
+}
+```
+
