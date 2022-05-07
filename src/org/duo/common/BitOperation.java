@@ -83,5 +83,9 @@ public class BitOperation {
         for (int i = 0; i <= 31; i++) {
             System.out.println((-1 >> i) & 1);
         }
+
+        String a1 = "b";
+        String b1 = "b";
+        System.out.println(a == b);
     }
 }
