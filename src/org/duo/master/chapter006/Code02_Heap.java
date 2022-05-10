@@ -7,6 +7,7 @@ public class Code02_Heap {
 
     /**
      * 堆结构就是用数组实现的完全二叉树结构
+     * 自定义大根堆
      */
     public static class MyMaxHeap {
         private int[] heap;
