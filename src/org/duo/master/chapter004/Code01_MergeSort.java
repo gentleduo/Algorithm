@@ -1,5 +1,8 @@
 package org.duo.master.chapter004;
 
+/**
+ * 归并排序
+ */
 public class Code01_MergeSort {
 
 	// 递归方法实现

@@ -1102,6 +1102,943 @@ public class HeapGreater<T> {
 
 # 排序
 
+## 选择排序
+
+```java
+import java.util.Arrays;
+
+/**
+ * 选择排序
+ * 时间复杂度：O(N^2)
+ */
+public class Code01_SelectionSort {
+
+    public static void selectionSort(int[] arr) {
+        if (arr == null || arr.length < 2) {
+            return;
+        }
+        // 0 ~ N-1  找到最小值，在哪，放到0位置上
+        // 1 ~ n-1  找到最小值，在哪，放到1 位置上
+        // 2 ~ n-1  找到最小值，在哪，放到2 位置上
+        for (int i = 0; i < arr.length - 1; i++) {
+            int minIndex = i;
+            for (int j = i + 1; j < arr.length; j++) { // i ~ N-1 上找最小值的下标
+                minIndex = arr[j] < arr[minIndex] ? j : minIndex;
+            }
+            swap(arr, i, minIndex);
+        }
+    }
+
+    public static void swap(int[] arr, int i, int j) {
+        int tmp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = tmp;
+    }
+
+    // for test
+    public static void comparator(int[] arr) {
+        Arrays.sort(arr);
+    }
+
+    // for test
+    public static int[] generateRandomArray(int maxSize, int maxValue) {
+        // Math.random()   [0,1)
+        // Math.random() * N  [0,N)
+        // (int)(Math.random() * N)  [0, N-1]
+        int[] arr = new int[(int) ((maxSize + 1) * Math.random())];
+        for (int i = 0; i < arr.length; i++) {
+            // [-? , +?]
+            arr[i] = (int) ((maxValue + 1) * Math.random()) - (int) (maxValue * Math.random());
+        }
+        return arr;
+    }
+
+    // for test
+    public static int[] copyArray(int[] arr) {
+        if (arr == null) {
+            return null;
+        }
+        int[] res = new int[arr.length];
+        for (int i = 0; i < arr.length; i++) {
+            res[i] = arr[i];
+        }
+        return res;
+    }
+
+    // for test
+    public static boolean isEqual(int[] arr1, int[] arr2) {
+        if ((arr1 == null && arr2 != null) || (arr1 != null && arr2 == null)) {
+            return false;
+        }
+        if (arr1 == null && arr2 == null) {
+            return true;
+        }
+        if (arr1.length != arr2.length) {
+            return false;
+        }
+        for (int i = 0; i < arr1.length; i++) {
+            if (arr1[i] != arr2[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // for test
+    public static void printArray(int[] arr) {
+        if (arr == null) {
+            return;
+        }
+        for (int i = 0; i < arr.length; i++) {
+            System.out.print(arr[i] + " ");
+        }
+        System.out.println();
+    }
+
+    // for test
+    public static void main(String[] args) {
+        int testTime = 500000;
+        int maxSize = 100;
+        int maxValue = 100;
+        boolean succeed = true;
+        for (int i = 0; i < testTime; i++) {
+            int[] arr1 = generateRandomArray(maxSize, maxValue);
+            int[] arr2 = copyArray(arr1);
+            selectionSort(arr1);
+            comparator(arr2);
+            if (!isEqual(arr1, arr2)) {
+                succeed = false;
+                printArray(arr1);
+                printArray(arr2);
+                break;
+            }
+        }
+        System.out.println(succeed ? "Nice!" : "Fucking fucked!");
+
+        int[] arr = generateRandomArray(maxSize, maxValue);
+        printArray(arr);
+        selectionSort(arr);
+        printArray(arr);
+    }
+
+}
+```
+
+## 冒泡排序
+
+```java
+import java.util.Arrays;
+
+/**
+ * 冒泡排序
+ * 时间复杂度：O(N^2)
+ */
+public class Code02_BubbleSort {
+
+	public static void bubbleSort(int[] arr) {
+		if (arr == null || arr.length < 2) {
+			return;
+		}
+		// 0 ~ N-1
+		// 0 ~ N-2
+		// 0 ~ N-3
+		for (int e = arr.length - 1; e > 0; e--) { // 0 ~ e
+			for (int i = 0; i < e; i++) {
+				if (arr[i] > arr[i + 1]) {
+					swap(arr, i, i + 1);
+				}
+			}
+		}
+	}
+
+	// 交换arr的i和j位置上的值
+	public static void swap(int[] arr, int i, int j) {
+		arr[i] = arr[i] ^ arr[j];
+		arr[j] = arr[i] ^ arr[j];
+		arr[i] = arr[i] ^ arr[j];
+	}
+
+	// for test
+	public static void comparator(int[] arr) {
+		Arrays.sort(arr);
+	}
+
+	// for test
+	public static int[] generateRandomArray(int maxSize, int maxValue) {
+		int[] arr = new int[(int) ((maxSize + 1) * Math.random())];
+		for (int i = 0; i < arr.length; i++) {
+			arr[i] = (int) ((maxValue + 1) * Math.random()) - (int) (maxValue * Math.random());
+		}
+		return arr;
+	}
+
+	// for test
+	public static int[] copyArray(int[] arr) {
+		if (arr == null) {
+			return null;
+		}
+		int[] res = new int[arr.length];
+		for (int i = 0; i < arr.length; i++) {
+			res[i] = arr[i];
+		}
+		return res;
+	}
+
+	// for test
+	public static boolean isEqual(int[] arr1, int[] arr2) {
+		if ((arr1 == null && arr2 != null) || (arr1 != null && arr2 == null)) {
+			return false;
+		}
+		if (arr1 == null && arr2 == null) {
+			return true;
+		}
+		if (arr1.length != arr2.length) {
+			return false;
+		}
+		for (int i = 0; i < arr1.length; i++) {
+			if (arr1[i] != arr2[i]) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	// for test
+	public static void printArray(int[] arr) {
+		if (arr == null) {
+			return;
+		}
+		for (int i = 0; i < arr.length; i++) {
+			System.out.print(arr[i] + " ");
+		}
+		System.out.println();
+	}
+
+	// for test
+	public static void main(String[] args) {		
+		int testTime = 500000;
+		int maxSize = 100;
+		int maxValue = 100;
+		boolean succeed = true;
+		for (int i = 0; i < testTime; i++) {
+			int[] arr1 = generateRandomArray(maxSize, maxValue);
+			int[] arr2 = copyArray(arr1);
+			bubbleSort(arr1);
+			comparator(arr2);
+			if (!isEqual(arr1, arr2)) {
+				succeed = false;
+				break;
+			}
+		}
+		System.out.println(succeed ? "Nice!" : "Fucking fucked!");
+
+		int[] arr = generateRandomArray(maxSize, maxValue);
+		printArray(arr);
+		bubbleSort(arr);
+		printArray(arr);
+	}
+
+}
+```
+
+## 插入排序
+
+```java
+import java.util.Arrays;
+
+/**
+ * 插入排序
+ * 时间复杂度：O(N^2)
+ * <p>
+ * 跟冒泡排序的区别：冒泡不受数据状况的影响，时间复杂度固定，例如：对于[1,2,3]和[3,2,1]进行排序的时间复杂度是一样的，都是O(N^2)
+ * 而插入排序的时间复杂度会根据数据状况的不同而不同，例如对[1,2,3]进行排序的时间复杂度为O(1)而对[3,2,1]进行排序的时间复杂度为O(N^2)
+ * <p>
+ * 但是当某个算法流程的复杂程度会根据数据状况的不同而不同时，那么必须要按照最差情况来估计时间复杂度。
+ * 很明显，在最差情况下，如果arr长度为N，插入排序的每一轮常数操作的数量，还是如等差数列一般，
+ * 所以总的常数操作数量 = a*(N^2) + b*N + c（a、b、c都是常数，也可以理解为a，b，c为固定时间的常数操作的耗时）
+ * 所以插入排序的时间复杂度为O(N^2)
+ */
+public class Code03_InsertionSort {
+
+    public static void insertionSort(int[] arr) {
+        if (arr == null || arr.length < 2) {
+            return;
+        }
+        // 不只1个数
+        // 依次实现两个下标之间的数据的有序
+        // 0 ~ 0
+        // 0 ~ 1
+        // 0 ~ 2
+        // 0 ~ i
+        // 0 ~ N-1
+        for (int i = 1; i < arr.length; i++) { // 0 ~ i 做到有序
+            for (int j = i - 1; j >= 0 && arr[j] > arr[j + 1]; j--) {
+                swap(arr, j, j + 1);
+            }
+        }
+    }
+
+    // i和j是一个位置的话，会出错
+    public static void swap(int[] arr, int i, int j) {
+        arr[i] = arr[i] ^ arr[j];
+        arr[j] = arr[i] ^ arr[j];
+        arr[i] = arr[i] ^ arr[j];
+    }
+
+    // for test
+    public static void comparator(int[] arr) {
+        Arrays.sort(arr);
+    }
+
+    // for test
+    public static int[] generateRandomArray(int maxSize, int maxValue) {
+        // Math.random() -> [0,1) 所有的小数，等概率返回一个
+        // Math.random() * N -> [0,N) 所有小数，等概率返回一个
+        // (int)(Math.random() * N) -> [0,N-1] 所有的整数，等概率返回一个
+        int[] arr = new int[(int) ((maxSize + 1) * Math.random())]; // 长度随机
+        for (int i = 0; i < arr.length; i++) {
+            arr[i] = (int) ((maxValue + 1) * Math.random()) - (int) (maxValue * Math.random());
+        }
+        return arr;
+    }
+
+    // for test
+    public static int[] copyArray(int[] arr) {
+        if (arr == null) {
+            return null;
+        }
+        int[] res = new int[arr.length];
+        for (int i = 0; i < arr.length; i++) {
+            res[i] = arr[i];
+        }
+        return res;
+    }
+
+    // for test
+    public static boolean isEqual(int[] arr1, int[] arr2) {
+        if ((arr1 == null && arr2 != null) || (arr1 != null && arr2 == null)) {
+            return false;
+        }
+        if (arr1 == null && arr2 == null) {
+            return true;
+        }
+        if (arr1.length != arr2.length) {
+            return false;
+        }
+        for (int i = 0; i < arr1.length; i++) {
+            if (arr1[i] != arr2[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // for test
+    public static void printArray(int[] arr) {
+        if (arr == null) {
+            return;
+        }
+        for (int i = 0; i < arr.length; i++) {
+            System.out.print(arr[i] + " ");
+        }
+        System.out.println();
+    }
+
+    // for test
+    public static void main(String[] args) {
+        int testTime = 500000;
+        int maxSize = 100; // 随机数组的长度0～100
+        int maxValue = 100;// 值：-100～100
+        boolean succeed = true;
+        for (int i = 0; i < testTime; i++) {
+            int[] arr = generateRandomArray(maxSize, maxValue);
+            int[] arr1 = copyArray(arr);
+            int[] arr2 = copyArray(arr);
+            insertionSort(arr1);
+            comparator(arr2);
+            if (!isEqual(arr1, arr2)) {
+                // 打印arr1
+                // 打印arr2
+                succeed = false;
+                for (int j = 0; j < arr.length; j++) {
+                    System.out.print(arr[j] + " ");
+                }
+                System.out.println();
+                break;
+            }
+        }
+        System.out.println(succeed ? "Nice!" : "Fucking fucked!");
+
+        int[] arr = generateRandomArray(maxSize, maxValue);
+        printArray(arr);
+        insertionSort(arr);
+        printArray(arr);
+    }
+
+}
+```
+
+## 归并排序
+
+```java
+/**
+ * 归并排序
+ */
+public class Code01_MergeSort {
+
+	// 递归方法实现
+	public static void mergeSort1(int[] arr) {
+		if (arr == null || arr.length < 2) {
+			return;
+		}
+		process(arr, 0, arr.length - 1);
+	}
+
+	// 请把arr[L..R]排有序
+	// l...r N
+	// T(N) = 2 * T(N / 2) + O(N)
+	// O(N * logN)
+	public static void process(int[] arr, int L, int R) {
+		if (L == R) { // base case
+			return;
+		}
+		int mid = L + ((R - L) >> 1);
+		process(arr, L, mid);
+		process(arr, mid + 1, R);
+		merge(arr, L, mid, R);
+	}
+
+	public static void merge(int[] arr, int L, int M, int R) {
+		int[] help = new int[R - L + 1];
+		int i = 0;
+		int p1 = L;
+		int p2 = M + 1;
+		while (p1 <= M && p2 <= R) {
+			help[i++] = arr[p1] <= arr[p2] ? arr[p1++] : arr[p2++];
+		}
+		// 要么p1越界了，要么p2越界了
+		while (p1 <= M) {
+			help[i++] = arr[p1++];
+		}
+		while (p2 <= R) {
+			help[i++] = arr[p2++];
+		}
+		for (i = 0; i < help.length; i++) {
+			arr[L + i] = help[i];
+		}
+	}
+
+	// 非递归方法实现
+	public static void mergeSort2(int[] arr) {
+		if (arr == null || arr.length < 2) {
+			return;
+		}
+		int N = arr.length;
+		// 步长
+		int mergeSize = 1;
+		while (mergeSize < N) { // log N
+			// 当前左组的，第一个位置
+			int L = 0;
+			while (L < N) {
+				if (mergeSize >= N - L) {
+					break;
+				}
+				int M = L + mergeSize - 1;
+				int R = M + Math.min(mergeSize, N - M - 1);
+				merge(arr, L, M, R);
+				L = R + 1;
+			}
+			// 防止溢出
+			if (mergeSize > N / 2) {
+				break;
+			}
+			mergeSize <<= 1;
+		}
+	}
+
+	// for test
+	public static int[] generateRandomArray(int maxSize, int maxValue) {
+		int[] arr = new int[(int) ((maxSize + 1) * Math.random())];
+		for (int i = 0; i < arr.length; i++) {
+			arr[i] = (int) ((maxValue + 1) * Math.random()) - (int) (maxValue * Math.random());
+		}
+		return arr;
+	}
+
+	// for test
+	public static int[] copyArray(int[] arr) {
+		if (arr == null) {
+			return null;
+		}
+		int[] res = new int[arr.length];
+		for (int i = 0; i < arr.length; i++) {
+			res[i] = arr[i];
+		}
+		return res;
+	}
+
+	// for test
+	public static boolean isEqual(int[] arr1, int[] arr2) {
+		if ((arr1 == null && arr2 != null) || (arr1 != null && arr2 == null)) {
+			return false;
+		}
+		if (arr1 == null && arr2 == null) {
+			return true;
+		}
+		if (arr1.length != arr2.length) {
+			return false;
+		}
+		for (int i = 0; i < arr1.length; i++) {
+			if (arr1[i] != arr2[i]) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	// for test
+	public static void printArray(int[] arr) {
+		if (arr == null) {
+			return;
+		}
+		for (int i = 0; i < arr.length; i++) {
+			System.out.print(arr[i] + " ");
+		}
+		System.out.println();
+	}
+
+	// for test
+	public static void main(String[] args) {
+		int testTime = 500000;
+		int maxSize = 100;
+		int maxValue = 100;
+		System.out.println("测试开始");
+		for (int i = 0; i < testTime; i++) {
+			int[] arr1 = generateRandomArray(maxSize, maxValue);
+			int[] arr2 = copyArray(arr1);
+			mergeSort1(arr1);
+			mergeSort2(arr2);
+			if (!isEqual(arr1, arr2)) {
+				System.out.println("出错了！");
+				printArray(arr1);
+				printArray(arr2);
+				break;
+			}
+		}
+		System.out.println("测试结束");
+	}
+}
+```
+
+## 随机快排
+
+```java
+import java.util.Stack;
+
+/**
+ * 随机快排
+ */
+public class Code02_PartitionAndQuickSort {
+
+    public static void swap(int[] arr, int i, int j) {
+        int tmp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = tmp;
+    }
+
+    // arr[L..R]上，以arr[R]位置的数做划分值
+    // 小于等于arr[R]的放左边，大于arr[R]的放右边，并且arr[R]跟小于等于区域最右边的值进行交换
+    public static int partition(int[] arr, int L, int R) {
+        if (L > R) {
+            return -1;
+        }
+        if (L == R) {
+            return L;
+        }
+        int lessEqual = L - 1;
+        int index = L;
+        while (index < R) {
+            if (arr[index] <= arr[R]) {
+                swap(arr, index, ++lessEqual);
+            }
+            index++;
+        }
+        swap(arr, ++lessEqual, R);
+        return lessEqual;
+    }
+
+    // arr[L...R]，以arr[R]位置的数做划分值
+    // 小于等于arr[R]的放左边，等于arr[R]的放中间，大于arr[R]的放右边，并且arr[R]跟大于区域最左边的值进行交换
+    public static int[] netherlandsFlag(int[] arr, int L, int R) {
+        if (L > R) { // L...R L>R
+            return new int[]{-1, -1};
+        }
+        if (L == R) {
+            return new int[]{L, R};
+        }
+        int less = L - 1; // < 区 右边界
+        int more = R; // > 区 左边界
+        int index = L;
+        while (index < more) { // 当前位置，不能和 >区的左边界撞上
+            if (arr[index] == arr[R]) {
+                index++;
+            } else if (arr[index] < arr[R]) {
+//				swap(arr, less + 1, index);
+//				less++;
+//				index++;						
+                swap(arr, index++, ++less);
+            } else { // >
+                swap(arr, index, --more);
+            }
+        }
+        swap(arr, more, R); // <[R]   =[R]   >[R]
+        return new int[]{less + 1, more};
+    }
+
+    /**
+     * 快排1和快排2的时间复杂都为O(N^2)
+     * 最差的情况是为类似这样的数组排序：[1,2,3,4,5,6,7]，并且以最后一个数作为比较数
+     * 第一次partition的时候会比较6个数，第二次partition比较5个数，因此整个算法的常数操作和为一个等差数列，
+     *
+     * @param arr
+     */
+    public static void quickSort1(int[] arr) {
+        if (arr == null || arr.length < 2) {
+            return;
+        }
+        process1(arr, 0, arr.length - 1);
+    }
+
+    public static void process1(int[] arr, int L, int R) {
+        if (L >= R) {
+            return;
+        }
+        // L..R partition arr[R] [ <=arr[R] arr[R] >arr[R] ]
+        int M = partition(arr, L, R);
+        process1(arr, L, M - 1);
+        process1(arr, M + 1, R);
+    }
+
+    public static void quickSort2(int[] arr) {
+        if (arr == null || arr.length < 2) {
+            return;
+        }
+        process2(arr, 0, arr.length - 1);
+    }
+
+    // arr[L...R] 排有序，快排2.0方式
+    public static void process2(int[] arr, int L, int R) {
+        if (L >= R) {
+            return;
+        }
+        // [ equalArea[0]  ,  equalArea[0]]
+        int[] equalArea = netherlandsFlag(arr, L, R);
+        process2(arr, L, equalArea[0] - 1);
+        process2(arr, equalArea[1] + 1, R);
+    }
+
+    /**
+     * 快排3的时间复杂度能做到O(N*logN)，原因如下：
+     * 1.通过快排为类似这样的数组：[1,2,3,7,5,6,4]进行排序时，时间复杂度最低，因为第一次partition的时间复杂度为O(N)
+     * 然后2个子集分别为[1,2,3]、[5,6,7]，即：N/2；那么：T(N) = 2  * T(N / 2) + O (N^1)；根据Master公式可以得到时间复杂度为：O(N*logN)；
+     * 2.通过快排为类似这样的数组：[1,2,3,4,5,6,7]进行排序时，时间复杂度最高：O(N^2)；
+     * 通过数学证明，通过随机数的方式选择比较数，可以使选择到最佳比较数概率趋近100%，因此快排3的时间复杂度为：O(N*logN)
+     *
+     * @param arr
+     */
+    public static void quickSort3(int[] arr) {
+        if (arr == null || arr.length < 2) {
+            return;
+        }
+        process3(arr, 0, arr.length - 1);
+    }
+
+    public static void process3(int[] arr, int L, int R) {
+        if (L >= R) {
+            return;
+        }
+        // 随机选取数组中某个下标的值和最右边的值进行交换
+        swap(arr, L + (int) (Math.random() * (R - L + 1)), R);
+        int[] equalArea = netherlandsFlag(arr, L, R);
+        process3(arr, L, equalArea[0] - 1);
+        process3(arr, equalArea[1] + 1, R);
+    }
+
+    // 快排非递归版本需要的辅助类
+    // 要处理的是什么范围上的排序
+    public static class Op {
+        public int l;
+        public int r;
+
+        public Op(int left, int right) {
+            l = left;
+            r = right;
+        }
+    }
+
+    // 快排3.0 非递归版本
+    public static void quickSort4(int[] arr) {
+        if (arr == null || arr.length < 2) {
+            return;
+        }
+        int N = arr.length;
+        swap(arr, (int) (Math.random() * N), N - 1);
+        int[] equalArea = netherlandsFlag(arr, 0, N - 1);
+        int el = equalArea[0];
+        int er = equalArea[1];
+        Stack<Op> stack = new Stack<>();
+        stack.push(new Op(0, el - 1));
+        stack.push(new Op(er + 1, N - 1));
+        while (!stack.isEmpty()) {
+            Op op = stack.pop(); // op.l  ... op.r
+            if (op.l < op.r) {
+                swap(arr, op.l + (int) (Math.random() * (op.r - op.l + 1)), op.r);
+                equalArea = netherlandsFlag(arr, op.l, op.r);
+                el = equalArea[0];
+                er = equalArea[1];
+                stack.push(new Op(op.l, el - 1));
+                stack.push(new Op(er + 1, op.r));
+            }
+        }
+    }
+
+    // for test
+    public static int[] generateRandomArray(int maxSize, int maxValue) {
+        int[] arr = new int[(int) ((maxSize + 1) * Math.random())];
+        for (int i = 0; i < arr.length; i++) {
+            arr[i] = (int) ((maxValue + 1) * Math.random()) - (int) (maxValue * Math.random());
+        }
+        return arr;
+    }
+
+    // for test
+    public static int[] copyArray(int[] arr) {
+        if (arr == null) {
+            return null;
+        }
+        int[] res = new int[arr.length];
+        for (int i = 0; i < arr.length; i++) {
+            res[i] = arr[i];
+        }
+        return res;
+    }
+
+    // for test
+    public static boolean isEqual(int[] arr1, int[] arr2) {
+        if ((arr1 == null && arr2 != null) || (arr1 != null && arr2 == null)) {
+            return false;
+        }
+        if (arr1 == null && arr2 == null) {
+            return true;
+        }
+        if (arr1.length != arr2.length) {
+            return false;
+        }
+        for (int i = 0; i < arr1.length; i++) {
+            if (arr1[i] != arr2[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // for test
+    public static void printArray(int[] arr) {
+        if (arr == null) {
+            return;
+        }
+        for (int i = 0; i < arr.length; i++) {
+            System.out.print(arr[i] + " ");
+        }
+        System.out.println();
+    }
+
+    // for test
+    public static void main(String[] args) {
+        int testTime = 500000;
+        int maxSize = 100;
+        int maxValue = 100;
+        boolean succeed = true;
+        for (int i = 0; i < testTime; i++) {
+            int[] arr1 = generateRandomArray(maxSize, maxValue);
+            int[] arr2 = copyArray(arr1);
+            int[] arr3 = copyArray(arr1);
+            int[] arr4 = copyArray(arr1);
+            quickSort1(arr1);
+            quickSort2(arr2);
+            quickSort3(arr3);
+            quickSort4(arr4);
+            if (!isEqual(arr1, arr2) || !isEqual(arr2, arr3) || !isEqual(arr3, arr4)) {
+                succeed = false;
+                break;
+            }
+        }
+        System.out.println(succeed ? "Nice!" : "Oops!");
+    }
+}
+```
+
+## 堆排序
+
+```java
+import java.util.Arrays;
+
+/**
+ * 利用堆的特点，对数组进行排序
+ */
+public class Code03_HeapSort {
+
+    // 堆排序的时间复杂度：O(N*logN)；额外空间复杂度O(1)
+    public static void heapSort(int[] arr) {
+
+        if (arr == null || arr.length < 2) {
+            return;
+        }
+//        // 首先将数据调整成大根堆，有两种方式：
+//        // 第一种，从头遍历整个数组，将每个数作为新插入的值并通过heapInsert方法跟父节点进行比较，如果值大于父节点的值就进行交换。
+//        // 时间复杂度： O(N*logN)
+//        for (int i = 0; i < arr.length; i++) { // O(N)
+//            heapInsert(arr, i); // O(logN)
+//        }
+        // 第二种，从底部遍历整个数组，
+        // 时间复杂度：O(N)
+        for (int i = arr.length - 1; i >= 0; i--) {
+            heapify(arr, i, arr.length);
+        }
+        // 第一次完成大根堆的创建后，堆大小为数组的大小。
+        int heapSize = arr.length;
+        // 全局最大值调整到数组的末尾，并且将堆大小减一，
+        // 将堆大小减一的原因是：全局最大值已经确定并且放在正确的位置，即：数组的末尾；那么它将不会在参与接下来的运算。
+        // 接下来将对剩下的heapSize-1的数重新构建大根堆，然后找到全局第二大的值，一直这样循环下去，直到heapSize等于0为止、
+        // 时间复杂度：O(N*logN)
+        swap(arr, 0, --heapSize);
+        while (heapSize > 0) { // O(N)
+            heapify(arr, 0, heapSize); // O(logN)
+            swap(arr, 0, --heapSize); // O(1)
+        }
+        // 第一次建立大根堆的时间复杂度为：O(N*logN)或者O(N)，
+        // 之后循环构建大根堆的时间复杂度是：O(N*logN)，
+        // 取最高阶所以堆排序的时间复杂度还是：O(N*logN)
+    }
+
+    // arr[index]刚来的数，往上
+    public static void heapInsert(int[] arr, int index) {
+        while (arr[index] > arr[(index - 1) / 2]) {
+            swap(arr, index, (index - 1) / 2);
+            index = (index - 1) / 2;
+        }
+    }
+
+    // arr[index]位置的数，能否往下移动
+    public static void heapify(int[] arr, int index, int heapSize) {
+        int left = index * 2 + 1; // 左孩子的下标
+        while (left < heapSize) { // 下方还有孩子的时候
+            // 两个孩子中，谁的值大，把下标给largest
+            // 1）只有左孩子，left -> largest
+            // 2) 同时有左孩子和右孩子，右孩子的值<= 左孩子的值，left -> largest
+            // 3) 同时有左孩子和右孩子并且右孩子的值> 左孩子的值， right -> largest
+            int largest = left + 1 < heapSize && arr[left + 1] > arr[left] ? left + 1 : left;
+            // 父和较大的孩子之间，谁的值大，把下标给largest
+            largest = arr[largest] > arr[index] ? largest : index;
+            if (largest == index) {
+                break;
+            }
+            swap(arr, largest, index);
+            index = largest;
+            left = index * 2 + 1;
+        }
+    }
+
+    public static void swap(int[] arr, int i, int j) {
+        int tmp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = tmp;
+    }
+
+    // for test
+    public static void comparator(int[] arr) {
+        Arrays.sort(arr);
+    }
+
+    // for test
+    public static int[] generateRandomArray(int maxSize, int maxValue) {
+        int[] arr = new int[(int) ((maxSize + 1) * Math.random())];
+        for (int i = 0; i < arr.length; i++) {
+            arr[i] = (int) ((maxValue + 1) * Math.random()) - (int) (maxValue * Math.random());
+        }
+        return arr;
+    }
+
+    // for test
+    public static int[] copyArray(int[] arr) {
+        if (arr == null) {
+            return null;
+        }
+        int[] res = new int[arr.length];
+        for (int i = 0; i < arr.length; i++) {
+            res[i] = arr[i];
+        }
+        return res;
+    }
+
+    // for test
+    public static boolean isEqual(int[] arr1, int[] arr2) {
+        if ((arr1 == null && arr2 != null) || (arr1 != null && arr2 == null)) {
+            return false;
+        }
+        if (arr1 == null && arr2 == null) {
+            return true;
+        }
+        if (arr1.length != arr2.length) {
+            return false;
+        }
+        for (int i = 0; i < arr1.length; i++) {
+            if (arr1[i] != arr2[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // for test
+    public static void printArray(int[] arr) {
+        if (arr == null) {
+            return;
+        }
+        for (int i = 0; i < arr.length; i++) {
+            System.out.print(arr[i] + " ");
+        }
+        System.out.println();
+    }
+
+    // for test
+    public static void main(String[] args) {
+
+        int testTime = 500000;
+        int maxSize = 100;
+        int maxValue = 100;
+        boolean succeed = true;
+        for (int i = 0; i < testTime; i++) {
+            int[] arr1 = generateRandomArray(maxSize, maxValue);
+            int[] arr2 = copyArray(arr1);
+            heapSort(arr1);
+            comparator(arr2);
+            if (!isEqual(arr1, arr2)) {
+                succeed = false;
+                break;
+            }
+        }
+        System.out.println(succeed ? "Nice!" : "Fucking fucked!");
+
+        int[] arr = generateRandomArray(maxSize, maxValue);
+        printArray(arr);
+        heapSort(arr);
+        printArray(arr);
+    }
+
+}
+```
+
 ## 稳定性
 
 稳定性是指同样大小的样本在排序之后不会改变相对次序
