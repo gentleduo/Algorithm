@@ -2,6 +2,9 @@ package org.duo.master.chapter005;
 
 import java.util.Stack;
 
+/**
+ * 随机快排
+ */
 public class Code02_PartitionAndQuickSort {
 
     public static void swap(int[] arr, int i, int j) {
@@ -11,7 +14,7 @@ public class Code02_PartitionAndQuickSort {
     }
 
     // arr[L..R]上，以arr[R]位置的数做划分值
-    // 小于等于arr[R]的放左边，大于arr[R]的放右边，并且arr[R]放在小于等于区域的最右边
+    // 小于等于arr[R]的放左边，大于arr[R]的放右边，并且arr[R]跟小于等于区域最右边的值进行交换
     public static int partition(int[] arr, int L, int R) {
         if (L > R) {
             return -1;
@@ -31,8 +34,8 @@ public class Code02_PartitionAndQuickSort {
         return lessEqual;
     }
 
-    // arr[L...R] 玩荷兰国旗问题的划分，以arr[R]做划分值
-    // <arr[R] ==arr[R] > arr[R]
+    // arr[L...R]，以arr[R]位置的数做划分值
+    // 小于等于arr[R]的放左边，等于arr[R]的放中间，大于arr[R]的放右边，并且arr[R]跟大于区域最左边的值进行交换
     public static int[] netherlandsFlag(int[] arr, int L, int R) {
         if (L > R) { // L...R L>R
             return new int[]{-1, -1};
