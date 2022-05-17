@@ -2074,6 +2074,8 @@ public class Code03_HeapSort {
 
 后序：任何子树的处理顺序都是：先左子树、再右子树、然后头节点。
 
+## 二叉树遍历
+
 ```java
 package org.duo.master.chapter010;
 
@@ -2152,7 +2154,7 @@ public class Code02_RecursiveTraversalBT {
 }
 ```
 
-二叉树的序列化和反序列化
+## 二叉树的序列化和反序列化
 
 ```java
 package org.duo.master.chapter011;
@@ -2449,6 +2451,248 @@ public class Code02_SerializeAndReconstructTree {
         System.out.println("test finish!");
 
     }
+}
+```
+
+## 搜索二叉树
+
+它或者是一棵空树，或者是具有下列性质的二叉树： 若它的左子树不空，则左子树上所有结点的值均小于它的根结点的值； 若它的右子树不空，则右子树上所有结点的值均大于它的根结点的值； 它的左、右子树也分别为二叉排序树。
+
+```java
+package org.duo.master.chapter012;
+
+import java.util.ArrayList;
+
+/**
+ * 判断是否为搜索二叉树
+ */
+public class Code02_IsBST {
+
+	public static class Node {
+		public int value;
+		public Node left;
+		public Node right;
+
+		public Node(int data) {
+			this.value = data;
+		}
+	}
+
+	public static boolean isBST1(Node head) {
+		if (head == null) {
+			return true;
+		}
+		ArrayList<Node> arr = new ArrayList<>();
+		in(head, arr);
+		for (int i = 1; i < arr.size(); i++) {
+			if (arr.get(i).value <= arr.get(i - 1).value) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public static void in(Node head, ArrayList<Node> arr) {
+		if (head == null) {
+			return;
+		}
+		in(head.left, arr);
+		arr.add(head);
+		in(head.right, arr);
+	}
+
+	public static boolean isBST2(Node head) {
+		if (head == null) {
+			return true;
+		}
+		return process(head).isBST;
+	}
+
+	public static class Info {
+		public boolean isBST;
+		public int max;
+		public int min;
+
+		public Info(boolean i, int ma, int mi) {
+			isBST = i;
+			max = ma;
+			min = mi;
+		}
+
+	}
+
+	public static Info process(Node x) {
+		if (x == null) {
+			return null;
+		}
+		Info leftInfo = process(x.left);
+		Info rightInfo = process(x.right);
+		int max = x.value;
+		if (leftInfo != null) {
+			max = Math.max(max, leftInfo.max);
+		}
+		if (rightInfo != null) {
+			max = Math.max(max, rightInfo.max);
+		}
+		int min = x.value;
+		if (leftInfo != null) {
+			min = Math.min(min, leftInfo.min);
+		}
+		if (rightInfo != null) {
+			min = Math.min(min, rightInfo.min);
+		}
+		boolean isBST = true;
+		if (leftInfo != null && !leftInfo.isBST) {
+			isBST = false;
+		}
+		if (rightInfo != null && !rightInfo.isBST) {
+			isBST = false;
+		}
+		if (leftInfo != null && leftInfo.max >= x.value) {
+			isBST = false;
+		}
+		if (rightInfo != null && rightInfo.min <= x.value) {
+			isBST = false;
+		}
+		return new Info(isBST, max, min);
+	}
+
+	// for test
+	public static Node generateRandomBST(int maxLevel, int maxValue) {
+		return generate(1, maxLevel, maxValue);
+	}
+
+	// for test
+	public static Node generate(int level, int maxLevel, int maxValue) {
+		if (level > maxLevel || Math.random() < 0.5) {
+			return null;
+		}
+		Node head = new Node((int) (Math.random() * maxValue));
+		head.left = generate(level + 1, maxLevel, maxValue);
+		head.right = generate(level + 1, maxLevel, maxValue);
+		return head;
+	}
+
+	public static void main(String[] args) {
+		int maxLevel = 4;
+		int maxValue = 100;
+		int testTimes = 1000000;
+		for (int i = 0; i < testTimes; i++) {
+			Node head = generateRandomBST(maxLevel, maxValue);
+			if (isBST1(head) != isBST2(head)) {
+				System.out.println("Oops!");
+			}
+		}
+		System.out.println("finish!");
+	}
+
+}
+```
+
+## 满二叉树
+
+个二叉树，如果每一个层的结点数都达到最大值，则这个二叉树就是满二叉树。也就是说，如果一个二叉树的深度为K，且结点总数是(2^k) -1 ，则它就是满二叉树。(一棵满二叉树的每一个结点要么是叶子结点，要么它有两个子结点，但是反过来不成立，因为完全二叉树也满足这个要求，但不是满二叉树)
+
+```java
+package org.duo.master.chapter012;
+
+/**
+ * 判断是否为满二叉树
+ * 满二叉树高度跟节点的关系：2^h -1
+ */
+public class Code04_IsFull {
+
+	public static class Node {
+		public int value;
+		public Node left;
+		public Node right;
+
+		public Node(int data) {
+			this.value = data;
+		}
+	}
+
+	public static boolean isFull1(Node head) {
+		if (head == null) {
+			return true;
+		}
+		int height = h(head);
+		int nodes = n(head);
+		return (1 << height) - 1 == nodes;
+	}
+
+	public static int h(Node head) {
+		if (head == null) {
+			return 0;
+		}
+		return Math.max(h(head.left), h(head.right)) + 1;
+	}
+
+	public static int n(Node head) {
+		if (head == null) {
+			return 0;
+		}
+		return n(head.left) + n(head.right) + 1;
+	}
+
+	public static boolean isFull2(Node head) {
+		if (head == null) {
+			return true;
+		}
+		Info all = process(head);
+		return (1 << all.height) - 1 == all.nodes;
+	}
+
+	public static class Info {
+		public int height;
+		public int nodes;
+
+		public Info(int h, int n) {
+			height = h;
+			nodes = n;
+		}
+	}
+
+	public static Info process(Node head) {
+		if (head == null) {
+			return new Info(0, 0);
+		}
+		Info leftInfo = process(head.left);
+		Info rightInfo = process(head.right);
+		int height = Math.max(leftInfo.height, rightInfo.height) + 1;
+		int nodes = leftInfo.nodes + rightInfo.nodes + 1;
+		return new Info(height, nodes);
+	}
+
+	// for test
+	public static Node generateRandomBST(int maxLevel, int maxValue) {
+		return generate(1, maxLevel, maxValue);
+	}
+
+	// for test
+	public static Node generate(int level, int maxLevel, int maxValue) {
+		if (level > maxLevel || Math.random() < 0.5) {
+			return null;
+		}
+		Node head = new Node((int) (Math.random() * maxValue));
+		head.left = generate(level + 1, maxLevel, maxValue);
+		head.right = generate(level + 1, maxLevel, maxValue);
+		return head;
+	}
+
+	public static void main(String[] args) {
+		int maxLevel = 5;
+		int maxValue = 100;
+		int testTimes = 1000000;
+		for (int i = 0; i < testTimes; i++) {
+			Node head = generateRandomBST(maxLevel, maxValue);
+			if (isFull1(head) != isFull2(head)) {
+				System.out.println("Oops!");
+			}
+		}
+		System.out.println("finish!");
+	}
+
 }
 ```
 
