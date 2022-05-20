@@ -23,7 +23,7 @@ public class Code02_NumberOfIslands {
 		return islands;
 	}
 
-	// 从(i,j)这个位置出发，把所有练成一片的'1'字符，变成0
+	// 从(i,j)这个位置出发，把所有练成一片的'1'字符，变成2
 	public static void infect(char[][] board, int i, int j) {
 		if (i < 0 || i == board.length || j < 0 || j == board[0].length || board[i][j] != '1') {
 			return;
