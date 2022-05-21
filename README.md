@@ -2983,3 +2983,389 @@ public class Code01_FriendCircles {
 }
 ```
 
+# 图
+
+图的特征
+
+1. 由点的集合和边的集合构成
+2. 虽然存在有向图和无向图的概念，但实际上都可以用有向图来表达
+3. 边上可能带有权重
+
+图结构的表达
+
+1. 邻接表法
+2. 邻接矩阵法
+3. 其他
+
+图的宽度优化和深度优先遍历
+
+宽度优先(BFS)
+
+1. 利用队列实现
+2. 从源节点开始依次按照宽度进队列，然后弹出
+3. 每弹出一个节点，把该节点所有没有进过队列的邻接点放入队列
+4. 直到队列变空
+
+深度优化(DFS)
+
+1. 利用栈实现
+2. 从源节点开始把节点按照深度放入栈，然后弹出
+3. 每弹出一个节点，把该节点下一个没有进过栈的邻接点放入栈
+4. 直到栈变空
+
+## 点结构
+
+```java
+package org.duo.master.chapter016;
+
+import java.util.ArrayList;
+
+// 点结构的描述
+public class Node {
+    
+    // 节点的值
+	public int value;
+    // 入度：有多少条到达该节点的边
+	public int in;
+    // 出度：有多少条从该节点出发的边
+	public int out;
+    // 邻居：以该节点出发直接到的节点
+	public ArrayList<Node> nexts;
+    // 边：从该节点出发的边
+	public ArrayList<Edge> edges;
+
+	public Node(int value) {
+		this.value = value;
+		in = 0;
+		out = 0;
+		nexts = new ArrayList<>();
+		edges = new ArrayList<>();
+	}
+}
+```
+
+比如：下面的图：入度为2；出度为3；邻居为6、7、8；边为到节点6、7、8的边
+
+
+
+```mermaid
+graph LR;
+A((3))-->B((5));
+C((4))-->B((5));
+B((5))-->D((6));
+B((5))-->E((7));
+B((5))-->F((8));
+```
+
+## 边结构
+
+```java
+package org.duo.master.chapter016;
+
+public class Edge {
+
+	// 权重
+	public int weight;
+	// 起始节点
+	public Node from;
+	// 到达节点
+	public Node to;
+
+	public Edge(int weight, Node from, Node to) {
+		this.weight = weight;
+		this.from = from;
+		this.to = to;
+	}
+}
+```
+
+## 图结构
+
+```java
+package org.duo.master.chapter016;
+
+import java.util.HashMap;
+import java.util.HashSet;
+
+public class Graph {
+
+    // 点的集合
+    public HashMap<Integer, Node> nodes;
+    // 边的集合
+    public HashSet<Edge> edges;
+
+    public Graph() {
+        nodes = new HashMap<>();
+        edges = new HashSet<>();
+    }
+}
+```
+
+## 图生成
+
+```java
+package org.duo.master.chapter016;
+
+public class GraphGenerator {
+
+	// matrix 所有的边
+	// N*3 的矩阵
+	// [weight, from节点上面的值，to节点上面的值]
+	// 
+	// [ 5 , 0 , 7]
+	// [ 3 , 0,  1]
+	// 
+	public static Graph createGraph(int[][] matrix) {
+		Graph graph = new Graph();
+		for (int i = 0; i < matrix.length; i++) {
+			 // 拿到每一条边， matrix[i] 
+			int weight = matrix[i][0];
+			int from = matrix[i][1];
+			int to = matrix[i][2];
+			if (!graph.nodes.containsKey(from)) {
+				graph.nodes.put(from, new Node(from));
+			}
+			if (!graph.nodes.containsKey(to)) {
+				graph.nodes.put(to, new Node(to));
+			}
+			Node fromNode = graph.nodes.get(from);
+			Node toNode = graph.nodes.get(to);
+			Edge newEdge = new Edge(weight, fromNode, toNode);
+			fromNode.nexts.add(toNode);
+			fromNode.out++;
+			toNode.in++;
+			fromNode.edges.add(newEdge);
+			graph.edges.add(newEdge);
+		}
+		return graph;
+	}
+}
+```
+
+## 宽度优先遍历
+
+```java
+package org.duo.master.chapter016;
+
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Queue;
+
+public class Code01_BFS {
+
+	// 从node出发，进行宽度优先遍历
+	public static void bfs(Node start) {
+		if (start == null) {
+			return;
+		}
+		Queue<Node> queue = new LinkedList<>();
+		HashSet<Node> set = new HashSet<>();
+		queue.add(start);
+		set.add(start);
+		while (!queue.isEmpty()) {
+			Node cur = queue.poll();
+			System.out.println(cur.value);
+			for (Node next : cur.nexts) {
+				if (!set.contains(next)) {
+					set.add(next);
+					queue.add(next);
+				}
+			}
+		}
+	}
+}
+```
+
+## 深度优先遍历
+
+```java
+package org.duo.master.chapter016;
+
+import java.util.HashSet;
+import java.util.Stack;
+
+public class Code02_DFS {
+
+	public static void dfs(Node node) {
+		if (node == null) {
+			return;
+		}
+		Stack<Node> stack = new Stack<>();
+		HashSet<Node> set = new HashSet<>();
+		stack.add(node);
+		set.add(node);
+		System.out.println(node.value);
+		while (!stack.isEmpty()) {
+			Node cur = stack.pop();
+			for (Node next : cur.nexts) {
+				if (!set.contains(next)) {
+					stack.push(cur);
+					stack.push(next);
+					set.add(next);
+					System.out.println(next.value);
+					break;
+				}
+			}
+		}
+	}
+}
+```
+
+## 拓扑排序
+
+拓扑排序的要求：一定是有向无环图；应用：事件安排、编译顺序。拓扑排序不唯一，并且每个都对。
+
+```java
+package org.duo.master.chapter016;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+
+public class Code03_TopologySort {
+
+	// directed graph and no loop
+	public static List<Node> sortedTopology(Graph graph) {
+		// key 某个节点   value 剩余的入度
+		HashMap<Node, Integer> inMap = new HashMap<>();
+		// 只有剩余入度为0的点，才进入这个队列
+		Queue<Node> zeroInQueue = new LinkedList<>();
+		for (Node node : graph.nodes.values()) {
+			inMap.put(node, node.in);
+			if (node.in == 0) {
+				zeroInQueue.add(node);
+			}
+		}
+		List<Node> result = new ArrayList<>();
+		while (!zeroInQueue.isEmpty()) {
+			Node cur = zeroInQueue.poll();
+			result.add(cur);
+			for (Node next : cur.nexts) {
+				inMap.put(next, inMap.get(next) - 1);
+				if (inMap.get(next) == 0) {
+					zeroInQueue.add(next);
+				}
+			}
+		}
+		return result;
+	}
+}
+```
+
+## 最小生成树
+
+Kruskal算法
+
+1. 总是从权值最小的边开始考虑，依次考察权值依次变大的边
+2. 当前的边要么进入最小生成树的集合，要么丢弃
+3. 如果当前的边进入最小生成树的集合后，不会形成环，就要当前边
+4. 如果当前的边进入最小生成树的集合后，会形成环，就不要当前边
+5. 考察完所有边之后，最小生成树的集合也得到了
+
+```java
+package org.duo.master.chapter016;
+
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.PriorityQueue;
+import java.util.Set;
+import java.util.Stack;
+
+//undirected graph only
+public class Code04_Kruskal {
+
+    // Union-Find Set
+    public static class UnionFind {
+
+        // key 某一个节点， value key节点往上的节点
+        private HashMap<Node, Node> fatherMap;
+        // key 某一个集合的代表节点, value key所在集合的节点个数
+        private HashMap<Node, Integer> sizeMap;
+
+        public UnionFind() {
+            fatherMap = new HashMap<Node, Node>();
+            sizeMap = new HashMap<Node, Integer>();
+        }
+
+        public void makeSets(Collection<Node> nodes) {
+            fatherMap.clear();
+            sizeMap.clear();
+            for (Node node : nodes) {
+                fatherMap.put(node, node);
+                sizeMap.put(node, 1);
+            }
+        }
+
+        private Node findFather(Node n) {
+            Stack<Node> path = new Stack<>();
+            while (n != fatherMap.get(n)) {
+                path.add(n);
+                n = fatherMap.get(n);
+            }
+            while (!path.isEmpty()) {
+                fatherMap.put(path.pop(), n);
+            }
+            return n;
+        }
+
+        public boolean isSameSet(Node a, Node b) {
+            return findFather(a) == findFather(b);
+        }
+
+        public void union(Node a, Node b) {
+            if (a == null || b == null) {
+                return;
+            }
+            Node aDai = findFather(a);
+            Node bDai = findFather(b);
+            if (aDai != bDai) {
+                int aSetSize = sizeMap.get(aDai);
+                int bSetSize = sizeMap.get(bDai);
+                if (aSetSize <= bSetSize) {
+                    fatherMap.put(aDai, bDai);
+                    sizeMap.put(bDai, aSetSize + bSetSize);
+                    sizeMap.remove(aDai);
+                } else {
+                    fatherMap.put(bDai, aDai);
+                    sizeMap.put(aDai, aSetSize + bSetSize);
+                    sizeMap.remove(bDai);
+                }
+            }
+        }
+    }
+
+
+    public static class EdgeComparator implements Comparator<Edge> {
+
+        @Override
+        public int compare(Edge o1, Edge o2) {
+            return o1.weight - o2.weight;
+        }
+
+    }
+
+    public static Set<Edge> kruskalMST(Graph graph) {
+        UnionFind unionFind = new UnionFind();
+        unionFind.makeSets(graph.nodes.values());
+        // 从小的边到大的边，依次弹出，小根堆！
+        PriorityQueue<Edge> priorityQueue = new PriorityQueue<>(new EdgeComparator());
+        for (Edge edge : graph.edges) { // M 条边
+            priorityQueue.add(edge);  // O(logM)
+        }
+        Set<Edge> result = new HashSet<>();
+        while (!priorityQueue.isEmpty()) { // M 条边
+            Edge edge = priorityQueue.poll(); // O(logM)
+            if (!unionFind.isSameSet(edge.from, edge.to)) { // O(1)
+                result.add(edge);
+                unionFind.union(edge.from, edge.to);
+            }
+        }
+        return result;
+    }
+}
+```
+
