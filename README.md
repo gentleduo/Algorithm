@@ -3369,3 +3369,401 @@ public class Code04_Kruskal {
 }
 ```
 
+# 暴力递归
+
+暴力递归就是尝试
+
+1. 把问题转化为规模缩小了的同类问题的子问题
+2. 有明确的不需要继续进行递归的条件
+3. 有当得到了子问题的结果之后的决策过程
+4. 不记录每一个子问题的解
+
+汉诺塔
+
+```java
+package org.duo.master.chapter017;
+
+import java.util.Stack;
+
+public class Code02_Hanoi {
+
+	public static void hanoi1(int n) {
+		leftToRight(n);
+	}
+
+	// 请把1~N层圆盘 从左 -> 右
+	public static void leftToRight(int n) {
+		if (n == 1) { // base case
+			System.out.println("Move 1 from left to right");
+			return;
+		}
+		leftToMid(n - 1);
+		System.out.println("Move " + n + " from left to right");
+		midToRight(n - 1);
+	}
+
+	// 请把1~N层圆盘 从左 -> 中
+	public static void leftToMid(int n) {
+		if (n == 1) {
+			System.out.println("Move 1 from left to mid");
+			return;
+		}
+		leftToRight(n - 1);
+		System.out.println("Move " + n + " from left to mid");
+		rightToMid(n - 1);
+	}
+
+	public static void rightToMid(int n) {
+		if (n == 1) {
+			System.out.println("Move 1 from right to mid");
+			return;
+		}
+		rightToLeft(n - 1);
+		System.out.println("Move " + n + " from right to mid");
+		leftToMid(n - 1);
+	}
+
+	public static void midToRight(int n) {
+		if (n == 1) {
+			System.out.println("Move 1 from mid to right");
+			return;
+		}
+		midToLeft(n - 1);
+		System.out.println("Move " + n + " from mid to right");
+		leftToRight(n - 1);
+	}
+
+	public static void midToLeft(int n) {
+		if (n == 1) {
+			System.out.println("Move 1 from mid to left");
+			return;
+		}
+		midToRight(n - 1);
+		System.out.println("Move " + n + " from mid to left");
+		rightToLeft(n - 1);
+	}
+
+	public static void rightToLeft(int n) {
+		if (n == 1) {
+			System.out.println("Move 1 from right to left");
+			return;
+		}
+		rightToMid(n - 1);
+		System.out.println("Move " + n + " from right to left");
+		midToLeft(n - 1);
+	}
+
+	public static void hanoi2(int n) {
+		if (n > 0) {
+			func(n, "left", "right", "mid");
+		}
+	}
+
+	public static void func(int N, String from, String to, String other) {
+		if (N == 1) { // base
+			System.out.println("Move 1 from " + from + " to " + to);
+		} else {
+			func(N - 1, from, other, to);
+			System.out.println("Move " + N + " from " + from + " to " + to);
+			func(N - 1, other, to, from);
+		}
+	}
+
+	public static class Record {
+		public boolean finish1;
+		public int base;
+		public String from;
+		public String to;
+		public String other;
+
+		public Record(boolean f1, int b, String f, String t, String o) {
+			finish1 = false;
+			base = b;
+			from = f;
+			to = t;
+			other = o;
+		}
+	}
+
+	public static void hanoi3(int N) {
+		if (N < 1) {
+			return;
+		}
+		Stack<Record> stack = new Stack<>();
+		stack.add(new Record(false, N, "left", "right", "mid"));
+		while (!stack.isEmpty()) {
+			Record cur = stack.pop();
+			if (cur.base == 1) {
+				System.out.println("Move 1 from " + cur.from + " to " + cur.to);
+				if (!stack.isEmpty()) {
+					stack.peek().finish1 = true;
+				}
+			} else {
+				if (!cur.finish1) {
+					stack.push(cur);
+					stack.push(new Record(false, cur.base - 1, cur.from, cur.other, cur.to));
+				} else {
+					System.out.println("Move " + cur.base + " from " + cur.from + " to " + cur.to);
+					stack.push(new Record(false, cur.base - 1, cur.other, cur.to, cur.from));
+				}
+			}
+		}
+	}
+
+	public static void main(String[] args) {
+		int n = 3;
+		hanoi1(n);
+		System.out.println("============");
+		hanoi2(n);
+//		System.out.println("============");
+//		hanoi3(n);
+	}
+
+}
+
+```
+
+打印一个字符串的全部子序列
+
+打印一个字符串的全部子序列，要求不要出现重复字面值的子序列
+
+```java
+package org.duo.master.chapter017;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+
+public class Code03_PrintAllSubsquences {
+
+	// s -> "abc" ->
+	public static List<String> subs(String s) {
+		char[] str = s.toCharArray();
+		String path = "";
+		List<String> ans = new ArrayList<>();
+		process1(str, 0, ans, path);
+		return ans;
+	}
+
+	// str 固定参数
+	// 来到了str[index]字符，index是位置
+	// str[0..index-1]已经走过了！之前的决定，都在path上
+	// 之前的决定已经不能改变了，就是path
+	// str[index....]还能决定，之前已经确定，而后面还能自由选择的话，
+	// 把所有生成的子序列，放入到ans里去
+	public static void process1(char[] str, int index, List<String> ans, String path) {
+		if (index == str.length) {
+			ans.add(path);
+			return;
+		}
+		// 没有要index位置的字符
+		process1(str, index + 1, ans, path);
+		// 要了index位置的字符
+		process1(str, index + 1, ans, path + String.valueOf(str[index]));
+	}
+
+	public static List<String> subsNoRepeat(String s) {
+		char[] str = s.toCharArray();
+		String path = "";
+		HashSet<String> set = new HashSet<>();
+		process2(str, 0, set, path);
+		List<String> ans = new ArrayList<>();
+		for (String cur : set) {
+			ans.add(cur);
+		}
+		return ans;
+	}
+
+	public static void process2(char[] str, int index, HashSet<String> set, String path) {
+		if (index == str.length) {
+			set.add(path);
+			return;
+		}
+		String no = path;
+		process2(str, index + 1, set, no);
+		String yes = path + String.valueOf(str[index]);
+		process2(str, index + 1, set, yes);
+	}
+
+	public static void main(String[] args) {
+		String test = "acccc";
+		List<String> ans1 = subs(test);
+		List<String> ans2 = subsNoRepeat(test);
+
+		for (String str : ans1) {
+			System.out.println(str);
+		}
+		System.out.println("=================");
+		for (String str : ans2) {
+			System.out.println(str);
+		}
+		System.out.println("=================");
+
+	}
+}
+```
+
+打印一个字符串的全部排列
+
+打印一个字符串的全部排列，要求不要出现重复的排列
+
+```java
+package org.duo.master.chapter017;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class Code04_PrintAllPermutations {
+
+	public static List<String> permutation1(String s) {
+		List<String> ans = new ArrayList<>();
+		if (s == null || s.length() == 0) {
+			return ans;
+		}
+		char[] str = s.toCharArray();
+		ArrayList<Character> rest = new ArrayList<Character>();
+		for (char cha : str) {
+			rest.add(cha);
+		}
+		String path = "";
+		f(rest, path, ans);
+		return ans;
+	}
+
+	public static void f(ArrayList<Character> rest, String path, List<String> ans) {
+		if (rest.isEmpty()) {
+			ans.add(path);
+		} else {
+			int N = rest.size();
+			for (int i = 0; i < N; i++) {
+				char cur = rest.get(i);
+				rest.remove(i);
+				f(rest, path + cur, ans);
+				rest.add(i, cur);
+			}
+		}
+	}
+
+	public static List<String> permutation2(String s) {
+		List<String> ans = new ArrayList<>();
+		if (s == null || s.length() == 0) {
+			return ans;
+		}
+		char[] str = s.toCharArray();
+		g1(str, 0, ans);
+		return ans;
+	}
+
+	public static void g1(char[] str, int index, List<String> ans) {
+		if (index == str.length) {
+			ans.add(String.valueOf(str));
+		} else {
+			for (int i = index; i < str.length; i++) {
+				swap(str, index, i);
+				g1(str, index + 1, ans);
+				swap(str, index, i);
+			}
+		}
+	}
+
+	public static List<String> permutation3(String s) {
+		List<String> ans = new ArrayList<>();
+		if (s == null || s.length() == 0) {
+			return ans;
+		}
+		char[] str = s.toCharArray();
+		g2(str, 0, ans);
+		return ans;
+	}
+
+	public static void g2(char[] str, int index, List<String> ans) {
+		if (index == str.length) {
+			ans.add(String.valueOf(str));
+		} else {
+			boolean[] visited = new boolean[256];
+			for (int i = index; i < str.length; i++) {
+				if (!visited[str[i]]) {
+					visited[str[i]] = true;
+					swap(str, index, i);
+					g2(str, index + 1, ans);
+					swap(str, index, i);
+				}
+			}
+		}
+	}
+
+	public static void swap(char[] chs, int i, int j) {
+		char tmp = chs[i];
+		chs[i] = chs[j];
+		chs[j] = tmp;
+	}
+
+	public static void main(String[] args) {
+		String s = "acc";
+		List<String> ans1 = permutation1(s);
+		for (String str : ans1) {
+			System.out.println(str);
+		}
+		System.out.println("=======");
+		List<String> ans2 = permutation2(s);
+		for (String str : ans2) {
+			System.out.println(str);
+		}
+		System.out.println("=======");
+		List<String> ans3 = permutation3(s);
+		for (String str : ans3) {
+			System.out.println(str);
+		}
+
+	}
+}
+```
+
+逆序一个栈
+
+```java
+package org.duo.master.chapter017;
+
+import java.util.Stack;
+
+public class Code05_ReverseStackUsingRecursive {
+
+	public static void reverse(Stack<Integer> stack) {
+		if (stack.isEmpty()) {
+			return;
+		}
+		int i = f(stack);
+		reverse(stack);
+		stack.push(i);
+	}
+
+	// 栈底元素移除掉
+	// 上面的元素盖下来
+	// 返回移除掉的栈底元素
+	public static int f(Stack<Integer> stack) {
+		int result = stack.pop();
+		if (stack.isEmpty()) {
+			return result;
+		} else {
+			int last = f(stack);
+			stack.push(result);
+			return last;
+		}
+	}
+
+	public static void main(String[] args) {
+		Stack<Integer> test = new Stack<Integer>();
+		test.push(1);
+		test.push(2);
+		test.push(3);
+		test.push(4);
+		test.push(5);
+		reverse(test);
+		while (!test.isEmpty()) {
+			System.out.println(test.pop());
+		}
+	}
+}
+```
+
+# 动态规划
