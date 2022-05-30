@@ -3378,6 +3378,8 @@ public class Code04_Kruskal {
 3. 有当得到了子问题的结果之后的决策过程
 4. 不记录每一个子问题的解
 
+## 示例1
+
 汉诺塔
 
 ```java
@@ -3523,6 +3525,8 @@ public class Code02_Hanoi {
 
 ```
 
+## 示例2
+
 打印一个字符串的全部子序列
 
 打印一个字符串的全部子序列，要求不要出现重复字面值的子序列
@@ -3602,6 +3606,8 @@ public class Code03_PrintAllSubsquences {
 	}
 }
 ```
+
+## 示例3
 
 打印一个字符串的全部排列
 
@@ -3719,6 +3725,8 @@ public class Code04_PrintAllPermutations {
 }
 ```
 
+## 示例4
+
 逆序一个栈
 
 ```java
@@ -3767,6 +3775,8 @@ public class Code05_ReverseStackUsingRecursive {
 ```
 
 # 动态规划
+
+## 示例1
 
 ```java
 package org.duo.master.chapter018;
@@ -3860,6 +3870,529 @@ public class Code01_RobotWalk {
 		System.out.println(ways1(5, 2, 4, 6));
 		System.out.println(ways2(5, 2, 4, 6));
 		System.out.println(ways3(5, 2, 4, 6));
+	}
+}
+```
+
+## 示例2
+
+```java
+package org.duo.master.chapter019;
+
+public class Code01_Knapsack {
+
+	// 所有的货，重量和价值，都在w和v数组里
+	// 为了方便，其中没有负数
+	// bag背包容量，不能超过这个载重
+	// 返回：不超重的情况下，能够得到的最大价值
+	public static int maxValue(int[] w, int[] v, int bag) {
+		if (w == null || v == null || w.length != v.length || w.length == 0) {
+			return 0;
+		}
+		// 尝试函数！
+		return process(w, v, 0, bag);
+	}
+
+	// index 0~N
+	// rest 负~bag
+	public static int process(int[] w, int[] v, int index, int rest) {
+		if (rest < 0) {
+			return -1;
+		}
+		if (index == w.length) {
+			return 0;
+		}
+		int p1 = process(w, v, index + 1, rest);
+		int p2 = 0;
+		int next = process(w, v, index + 1, rest - w[index]);
+		if (next != -1) {
+			p2 = v[index] + next;
+		}
+		return Math.max(p1, p2);
+	}
+
+	public static int dp(int[] w, int[] v, int bag) {
+		if (w == null || v == null || w.length != v.length || w.length == 0) {
+			return 0;
+		}
+		int N = w.length;
+		int[][] dp = new int[N + 1][bag + 1];
+		for (int index = N - 1; index >= 0; index--) {
+			for (int rest = 0; rest <= bag; rest++) {
+				int p1 = dp[index + 1][rest];
+				int p2 = 0;
+				int next = rest - w[index] < 0 ? -1 : dp[index + 1][rest - w[index]];
+				if (next != -1) {
+					p2 = v[index] + next;
+				}
+				dp[index][rest] = Math.max(p1, p2);
+			}
+		}
+		return dp[0][bag];
+	}
+
+	public static void main(String[] args) {
+		int[] weights = { 3, 2, 4, 7, 3, 1, 7 };
+		int[] values = { 5, 6, 3, 19, 12, 4, 2 };
+		int bag = 15;
+		System.out.println(maxValue(weights, values, bag));
+		System.out.println(dp(weights, values, bag));
+	}
+
+}
+```
+
+## 示例3
+
+给定一个字符串str，返回这个字符串的最大的回文子序列长度
+比如：str="a12b3c43def2ghi1kpm"
+最大回文子序列是"1234321"或者"123c321"，返回长度7
+
+```java
+package org.duo.master.chapter020;
+
+// 测试链接：https://leetcode.com/problems/longest-palindromic-subsequence/
+public class Code01_PalindromeSubsequence {
+
+	public static int lpsl1(String s) {
+		if (s == null || s.length() == 0) {
+			return 0;
+		}
+		char[] str = s.toCharArray();
+		return f(str, 0, str.length - 1);
+	}
+
+	// str[L..R]最长回文子序列长度返回
+	public static int f(char[] str, int L, int R) {
+		if (L == R) {
+			return 1;
+		}
+		if (L == R - 1) {
+			return str[L] == str[R] ? 2 : 1;
+		}
+		int p1 = f(str, L + 1, R - 1);
+		int p2 = f(str, L, R - 1);
+		int p3 = f(str, L + 1, R);
+		int p4 = str[L] != str[R] ? 0 : (2 + f(str, L + 1, R - 1));
+		return Math.max(Math.max(p1, p2), Math.max(p3, p4));
+	}
+
+	public static int lpsl2(String s) {
+		if (s == null || s.length() == 0) {
+			return 0;
+		}
+		char[] str = s.toCharArray();
+		int N = str.length;
+		int[][] dp = new int[N][N];
+		dp[N - 1][N - 1] = 1;
+		for (int i = 0; i < N - 1; i++) {
+			dp[i][i] = 1;
+			dp[i][i + 1] = str[i] == str[i + 1] ? 2 : 1;
+		}
+		for (int L = N - 3; L >= 0; L--) {
+			for (int R = L + 2; R < N; R++) {
+				dp[L][R] = Math.max(dp[L][R - 1], dp[L + 1][R]);
+				if (str[L] == str[R]) {
+					dp[L][R] = Math.max(dp[L][R], 2 + dp[L + 1][R - 1]);
+				}
+			}
+		}
+		return dp[0][N - 1];
+	}
+
+	public static int longestPalindromeSubseq1(String s) {
+		if (s == null || s.length() == 0) {
+			return 0;
+		}
+		if (s.length() == 1) {
+			return 1;
+		}
+		char[] str = s.toCharArray();
+		char[] reverse = reverse(str);
+		return longestCommonSubsequence(str, reverse);
+	}
+
+	public static char[] reverse(char[] str) {
+		int N = str.length;
+		char[] reverse = new char[str.length];
+		for (int i = 0; i < str.length; i++) {
+			reverse[--N] = str[i];
+		}
+		return reverse;
+	}
+
+	public static int longestCommonSubsequence(char[] str1, char[] str2) {
+		int N = str1.length;
+		int M = str2.length;
+		int[][] dp = new int[N][M];
+		dp[0][0] = str1[0] == str2[0] ? 1 : 0;
+		for (int i = 1; i < N; i++) {
+			dp[i][0] = str1[i] == str2[0] ? 1 : dp[i - 1][0];
+		}
+		for (int j = 1; j < M; j++) {
+			dp[0][j] = str1[0] == str2[j] ? 1 : dp[0][j - 1];
+		}
+		for (int i = 1; i < N; i++) {
+			for (int j = 1; j < M; j++) {
+				dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+				if (str1[i] == str2[j]) {
+					dp[i][j] = Math.max(dp[i][j], dp[i - 1][j - 1] + 1);
+				}
+			}
+		}
+		return dp[N - 1][M - 1];
+	}
+
+	public static int longestPalindromeSubseq2(String s) {
+		if (s == null || s.length() == 0) {
+			return 0;
+		}
+		if (s.length() == 1) {
+			return 1;
+		}
+		char[] str = s.toCharArray();
+		int N = str.length;
+		int[][] dp = new int[N][N];
+		dp[N - 1][N - 1] = 1;
+		for (int i = 0; i < N - 1; i++) {
+			dp[i][i] = 1;
+			dp[i][i + 1] = str[i] == str[i + 1] ? 2 : 1;
+		}
+		for (int i = N - 3; i >= 0; i--) {
+			for (int j = i + 2; j < N; j++) {
+				dp[i][j] = Math.max(dp[i][j - 1], dp[i + 1][j]);
+				if (str[i] == str[j]) {
+					dp[i][j] = Math.max(dp[i][j], dp[i + 1][j - 1] + 2);
+				}
+			}
+		}
+		return dp[0][N - 1];
+	}
+}
+```
+
+## 示例4
+
+在象棋中，马从棋盘的左下角，即(0,0)位置出发，走过k步后，最后落在(x,y)上的方法有多少种。
+假设整个棋盘横坐标上9条线，纵坐标上10条线。
+
+```java
+package org.duo.master.chapter020;
+
+public class Code02_HorseJump {
+
+	// 当前来到的位置是（x,y）
+	// 还剩下rest步需要跳
+	// 跳完rest步，正好跳到a，b的方法数是多少？
+	// 10 * 9
+	public static int jump(int a, int b, int k) {
+		return process(0, 0, k, a, b);
+	}
+
+	public static int process(int x, int y, int rest, int a, int b) {
+		if (x < 0 || x > 9 || y < 0 || y > 8) {
+			return 0;
+		}
+		if (rest == 0) {
+			return (x == a && y == b) ? 1 : 0;
+		}
+        // 根据象棋比赛规则，当马目前在(x,y)位置时，接下来有如下8种跳法
+		int ways = process(x + 2, y + 1, rest - 1, a, b);
+		ways += process(x + 1, y + 2, rest - 1, a, b);
+		ways += process(x - 1, y + 2, rest - 1, a, b);
+		ways += process(x - 2, y + 1, rest - 1, a, b);
+		ways += process(x - 2, y - 1, rest - 1, a, b);
+		ways += process(x - 1, y - 2, rest - 1, a, b);
+		ways += process(x + 1, y - 2, rest - 1, a, b);
+		ways += process(x + 2, y - 1, rest - 1, a, b);
+		return ways;
+	}
+
+	public static int dp(int a, int b, int k) {
+		int[][][] dp = new int[10][9][k + 1];
+		dp[a][b][0] = 1;
+		for (int rest = 1; rest <= k; rest++) {
+			for (int x = 0; x < 10; x++) {
+				for (int y = 0; y < 9; y++) {
+					int ways = pick(dp, x + 2, y + 1, rest - 1);
+					ways += pick(dp, x + 1, y + 2, rest - 1);
+					ways += pick(dp, x - 1, y + 2, rest - 1);
+					ways += pick(dp, x - 2, y + 1, rest - 1);
+					ways += pick(dp, x - 2, y - 1, rest - 1);
+					ways += pick(dp, x - 1, y - 2, rest - 1);
+					ways += pick(dp, x + 1, y - 2, rest - 1);
+					ways += pick(dp, x + 2, y - 1, rest - 1);
+					dp[x][y][rest] = ways;
+				}
+			}
+		}
+		return dp[0][0][k];
+	}
+
+	public static int pick(int[][][] dp, int x, int y, int rest) {
+		if (x < 0 || x > 9 || y < 0 || y > 8) {
+			return 0;
+		}
+		return dp[x][y][rest];
+	}
+
+	public static int ways(int a, int b, int step) {
+		return f(0, 0, step, a, b);
+	}
+
+	public static int f(int i, int j, int step, int a, int b) {
+		if (i < 0 || i > 9 || j < 0 || j > 8) {
+			return 0;
+		}
+		if (step == 0) {
+			return (i == a && j == b) ? 1 : 0;
+		}
+		return f(i - 2, j + 1, step - 1, a, b) + f(i - 1, j + 2, step - 1, a, b) + f(i + 1, j + 2, step - 1, a, b)
+				+ f(i + 2, j + 1, step - 1, a, b) + f(i + 2, j - 1, step - 1, a, b) + f(i + 1, j - 2, step - 1, a, b)
+				+ f(i - 1, j - 2, step - 1, a, b) + f(i - 2, j - 1, step - 1, a, b);
+
+	}
+
+	public static int waysdp(int a, int b, int s) {
+		int[][][] dp = new int[10][9][s + 1];
+		dp[a][b][0] = 1;
+		for (int step = 1; step <= s; step++) { // 按层来
+			for (int i = 0; i < 10; i++) {
+				for (int j = 0; j < 9; j++) {
+					dp[i][j][step] = getValue(dp, i - 2, j + 1, step - 1) + getValue(dp, i - 1, j + 2, step - 1)
+							+ getValue(dp, i + 1, j + 2, step - 1) + getValue(dp, i + 2, j + 1, step - 1)
+							+ getValue(dp, i + 2, j - 1, step - 1) + getValue(dp, i + 1, j - 2, step - 1)
+							+ getValue(dp, i - 1, j - 2, step - 1) + getValue(dp, i - 2, j - 1, step - 1);
+				}
+			}
+		}
+		return dp[0][0][s];
+	}
+
+	// 在dp表中，得到dp[i][j][step]的值，但如果(i，j)位置越界的话，返回0；
+	public static int getValue(int[][][] dp, int i, int j, int step) {
+		if (i < 0 || i > 9 || j < 0 || j > 8) {
+			return 0;
+		}
+		return dp[i][j][step];
+	}
+
+	public static void main(String[] args) {
+		int x = 7;
+		int y = 7;
+		int step = 10;
+		System.out.println(ways(x, y, step));
+		System.out.println(dp(x, y, step));
+
+		System.out.println(jump(x, y, step));
+	}
+}
+```
+
+## 示例5
+
+```java
+package org.duo.master.chapter020;
+
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.PriorityQueue;
+
+// 题目
+// 数组arr代表每一个咖啡机冲一杯咖啡的时间，每个咖啡机只能串行的制造咖啡。
+// 现在有n个人需要喝咖啡，只能用咖啡机来制造咖啡。
+// 认为每个人喝咖啡的时间非常短，冲好的时间即是喝完的时间。(即：不考虑和咖啡的时间)
+// 每个人喝完之后咖啡杯可以选择洗或者自然挥发干净，只有一台洗咖啡杯的机器，只能串行的洗咖啡杯，但是可以并行的自然挥发。
+// 洗杯子的机器洗完一个杯子时间为a，任何一个杯子自然挥发干净的时间为b。
+// 四个参数：arr, n, a, b
+// 假设时间点从0开始，返回所有人喝完咖啡并洗完咖啡杯的全部过程结束后，至少来到什么时间点。
+public class Code03_Coffee {
+
+	// 验证的方法
+	// 彻底的暴力
+	// 很慢但是绝对正确
+	public static int right(int[] arr, int n, int a, int b) {
+		int[] times = new int[arr.length];
+		int[] drink = new int[n];
+		return forceMake(arr, times, 0, drink, n, a, b);
+	}
+
+	// 每个人暴力尝试用每一个咖啡机给自己做咖啡
+	public static int forceMake(int[] arr, int[] times, int kth, int[] drink, int n, int a, int b) {
+		if (kth == n) {
+			int[] drinkSorted = Arrays.copyOf(drink, kth);
+			Arrays.sort(drinkSorted);
+			return forceWash(drinkSorted, a, b, 0, 0, 0);
+		}
+		int time = Integer.MAX_VALUE;
+		for (int i = 0; i < arr.length; i++) {
+			int work = arr[i];
+			int pre = times[i];
+			drink[kth] = pre + work;
+			times[i] = pre + work;
+			time = Math.min(time, forceMake(arr, times, kth + 1, drink, n, a, b));
+			drink[kth] = 0;
+			times[i] = pre;
+		}
+		return time;
+	}
+
+	public static int forceWash(int[] drinks, int a, int b, int index, int washLine, int time) {
+		if (index == drinks.length) {
+			return time;
+		}
+		// 选择一：当前index号咖啡杯，选择用洗咖啡机刷干净
+		int wash = Math.max(drinks[index], washLine) + a;
+		int ans1 = forceWash(drinks, a, b, index + 1, wash, Math.max(wash, time));
+
+		// 选择二：当前index号咖啡杯，选择自然挥发
+		int dry = drinks[index] + b;
+		int ans2 = forceWash(drinks, a, b, index + 1, washLine, Math.max(dry, time));
+		return Math.min(ans1, ans2);
+	}
+
+	// 以下为贪心+优良暴力
+	public static class Machine {
+		public int timePoint;
+		public int workTime;
+
+		public Machine(int t, int w) {
+			timePoint = t;
+			workTime = w;
+		}
+	}
+
+	public static class MachineComparator implements Comparator<Machine> {
+
+		@Override
+		public int compare(Machine o1, Machine o2) {
+			return (o1.timePoint + o1.workTime) - (o2.timePoint + o2.workTime);
+		}
+
+	}
+
+	// 优良一点的暴力尝试的方法
+	public static int minTime1(int[] arr, int n, int a, int b) {
+		PriorityQueue<Machine> heap = new PriorityQueue<Machine>(new MachineComparator());
+		for (int i = 0; i < arr.length; i++) {
+			heap.add(new Machine(0, arr[i]));
+		}
+		int[] drinks = new int[n];
+		for (int i = 0; i < n; i++) {
+			Machine cur = heap.poll();
+			cur.timePoint += cur.workTime;
+			drinks[i] = cur.timePoint;
+			heap.add(cur);
+		}
+		return bestTime(drinks, a, b, 0, 0);
+	}
+
+	// drinks 所有杯子可以开始洗的时间
+	// wash 单杯洗干净的时间（串行）
+	// air 挥发干净的时间(并行)
+	// free 洗的机器什么时候可用
+    // index 当前杯子在数组中的下标
+	// 返回值表示：drinks[index.....]都变干净，最早的结束时间（返回）
+	public static int bestTime(int[] drinks, int wash, int air, int index, int free) {
+		if (index == drinks.length) {
+			return 0;
+		}
+		// index号杯子 决定洗
+		int selfClean1 = Math.max(drinks[index], free) + wash;
+		int restClean1 = bestTime(drinks, wash, air, index + 1, selfClean1);
+		int p1 = Math.max(selfClean1, restClean1);
+
+		// index号杯子 决定挥发
+		int selfClean2 = drinks[index] + air;
+		int restClean2 = bestTime(drinks, wash, air, index + 1, free);
+		int p2 = Math.max(selfClean2, restClean2);
+		return Math.min(p1, p2);
+	}
+
+	// 贪心+优良尝试改成动态规划
+	public static int minTime2(int[] arr, int n, int a, int b) {
+		PriorityQueue<Machine> heap = new PriorityQueue<Machine>(new MachineComparator());
+		for (int i = 0; i < arr.length; i++) {
+			heap.add(new Machine(0, arr[i]));
+		}
+		int[] drinks = new int[n];
+		for (int i = 0; i < n; i++) {
+			Machine cur = heap.poll();
+			cur.timePoint += cur.workTime;
+			drinks[i] = cur.timePoint;
+			heap.add(cur);
+		}
+		return bestTimeDp(drinks, a, b);
+	}
+
+	public static int bestTimeDp(int[] drinks, int wash, int air) {
+		int N = drinks.length;
+		int maxFree = 0;
+		for (int i = 0; i < drinks.length; i++) {
+			maxFree = Math.max(maxFree, drinks[i]) + wash;
+		}
+		int[][] dp = new int[N + 1][maxFree + 1];
+		for (int index = N - 1; index >= 0; index--) {
+			for (int free = 0; free <= maxFree; free++) {
+				int selfClean1 = Math.max(drinks[index], free) + wash;
+				if (selfClean1 > maxFree) {
+					break; // 因为后面的也都不用填了
+				}
+				// index号杯子 决定洗
+				int restClean1 = dp[index + 1][selfClean1];
+				int p1 = Math.max(selfClean1, restClean1);
+				// index号杯子 决定挥发
+				int selfClean2 = drinks[index] + air;
+				int restClean2 = dp[index + 1][free];
+				int p2 = Math.max(selfClean2, restClean2);
+				dp[index][free] = Math.min(p1, p2);
+			}
+		}
+		return dp[0][0];
+	}
+
+	// for test
+	public static int[] randomArray(int len, int max) {
+		int[] arr = new int[len];
+		for (int i = 0; i < len; i++) {
+			arr[i] = (int) (Math.random() * max) + 1;
+		}
+		return arr;
+	}
+
+	// for test
+	public static void printArray(int[] arr) {
+		System.out.print("arr : ");
+		for (int j = 0; j < arr.length; j++) {
+			System.out.print(arr[j] + ", ");
+		}
+		System.out.println();
+	}
+
+	public static void main(String[] args) {
+		int len = 10;
+		int max = 10;
+		int testTime = 10;
+		System.out.println("测试开始");
+		for (int i = 0; i < testTime; i++) {
+			int[] arr = randomArray(len, max);
+			int n = (int) (Math.random() * 7) + 1;
+			int a = (int) (Math.random() * 7) + 1;
+			int b = (int) (Math.random() * 10) + 1;
+			int ans1 = right(arr, n, a, b);
+			int ans2 = minTime1(arr, n, a, b);
+			int ans3 = minTime2(arr, n, a, b);
+			if (ans1 != ans2 || ans2 != ans3) {
+				printArray(arr);
+				System.out.println("n : " + n);
+				System.out.println("a : " + a);
+				System.out.println("b : " + b);
+				System.out.println(ans1 + " , " + ans2 + " , " + ans3);
+				System.out.println("===============");
+				break;
+			}
+		}
+		System.out.println("测试结束");
 	}
 }
 ```
