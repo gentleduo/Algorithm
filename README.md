@@ -4397,3 +4397,299 @@ public class Code03_Coffee {
 }
 ```
 
+## 示例6
+
+给定一个二位数据matrix，一个人必须从左上角出发，最后到达右下角沿途只可以向下或者向右走，沿途的数字累加就是距离累加和，返回最小距离累加和。（最简单但是最经典的动态规划）
+
+```java
+package org.duo.master.chapter021;
+
+public class Code01_MinPathSum {
+
+	/**
+	 * 该版本的算法比较浪费空间，需要额外准备一个nxm的数组
+	 * @param m
+	 * @return
+	 */
+	public static int minPathSum1(int[][] m) {
+		if (m == null || m.length == 0 || m[0] == null || m[0].length == 0) {
+			return 0;
+		}
+		int row = m.length;
+		int col = m[0].length;
+		int[][] dp = new int[row][col];
+		dp[0][0] = m[0][0];
+		for (int i = 1; i < row; i++) {
+			dp[i][0] = dp[i - 1][0] + m[i][0];
+		}
+		for (int j = 1; j < col; j++) {
+			dp[0][j] = dp[0][j - 1] + m[0][j];
+		}
+		for (int i = 1; i < row; i++) {
+			for (int j = 1; j < col; j++) {
+				dp[i][j] = Math.min(dp[i - 1][j], dp[i][j - 1]) + m[i][j];
+			}
+		}
+		return dp[row - 1][col - 1];
+	}
+
+	/**
+	 * 由于在计算的过程中dp[i][j]只依赖第i-1行以及第i行，所以可以优化空间
+	 * 第一个版本：准备两个一维数组，一个数组保存第i-1行的计算结果，一个保存正在计算的第i行的数据
+	 * 第二个版本：准备一个一维数组即可。
+	 * @param m
+	 * @return
+	 */
+	public static int minPathSum2(int[][] m) {
+		if (m == null || m.length == 0 || m[0] == null || m[0].length == 0) {
+			return 0;
+		}
+		int row = m.length;
+		int col = m[0].length;
+		int[] dp = new int[col];
+		dp[0] = m[0][0];
+		for (int j = 1; j < col; j++) {
+			dp[j] = dp[j - 1] + m[0][j];
+		}
+		for (int i = 1; i < row; i++) {
+			dp[0] += m[i][0];
+			for (int j = 1; j < col; j++) {
+				dp[j] = Math.min(dp[j - 1], dp[j]) + m[i][j];
+			}
+		}
+		return dp[col - 1];
+	}
+
+	// for test
+	public static int[][] generateRandomMatrix(int rowSize, int colSize) {
+		if (rowSize < 0 || colSize < 0) {
+			return null;
+		}
+		int[][] result = new int[rowSize][colSize];
+		for (int i = 0; i != result.length; i++) {
+			for (int j = 0; j != result[0].length; j++) {
+				result[i][j] = (int) (Math.random() * 100);
+			}
+		}
+		return result;
+	}
+
+	// for test
+	public static void printMatrix(int[][] matrix) {
+		for (int i = 0; i != matrix.length; i++) {
+			for (int j = 0; j != matrix[0].length; j++) {
+				System.out.print(matrix[i][j] + " ");
+			}
+			System.out.println();
+		}
+	}
+
+	public static void main(String[] args) {
+		int rowSize = 10;
+		int colSize = 10;
+		int[][] m = generateRandomMatrix(rowSize, colSize);
+		System.out.println(minPathSum1(m));
+		System.out.println(minPathSum2(m));
+
+	}
+}
+```
+
+## 示例7
+
+arr是货币数组，其中的值都是正数。再给定一个正数aim。每个值都认为是一张货币，即便是值相同的货币也认为每一张都是不同的，返回组成aim的方法数。例如：arr=[1,1,1]，aim=2，第0个和第1个能组成2，第1个和第2个能组成2，第0个和第2个能组成2，一个就3中方法，所以返回3。
+
+```java
+package org.duo.master.chapter021;
+
+public class Code02_CoinsWayEveryPaperDifferent {
+
+	public static int coinWays(int[] arr, int aim) {
+		return process(arr, 0, aim);
+	}
+
+	// arr[index....] 组成正好rest这么多的钱，有几种方法
+	public static int process(int[] arr, int index, int rest) {
+		if (rest < 0) {
+			return 0;
+		}
+		if (index == arr.length) { // 没钱了！
+			return rest == 0 ? 1 : 0;
+		} else {
+			return process(arr, index + 1, rest) + process(arr, index + 1, rest - arr[index]);
+		}
+	}
+
+	public static int dp(int[] arr, int aim) {
+		if (aim == 0) {
+			return 1;
+		}
+		int N = arr.length;
+		int[][] dp = new int[N + 1][aim + 1];
+		dp[N][0] = 1;
+		for (int index = N - 1; index >= 0; index--) {
+			for (int rest = 0; rest <= aim; rest++) {
+				dp[index][rest] = dp[index + 1][rest] + (rest - arr[index] >= 0 ? dp[index + 1][rest - arr[index]] : 0);
+			}
+		}
+		return dp[0][aim];
+	}
+
+	// 为了测试
+	public static int[] randomArray(int maxLen, int maxValue) {
+		int N = (int) (Math.random() * maxLen);
+		int[] arr = new int[N];
+		for (int i = 0; i < N; i++) {
+			arr[i] = (int) (Math.random() * maxValue) + 1;
+		}
+		return arr;
+	}
+
+	// 为了测试
+	public static void printArray(int[] arr) {
+		for (int i = 0; i < arr.length; i++) {
+			System.out.print(arr[i] + " ");
+		}
+		System.out.println();
+	}
+
+	// 为了测试
+	public static void main(String[] args) {
+		int maxLen = 20;
+		int maxValue = 30;
+		int testTime = 1000000;
+		System.out.println("测试开始");
+		for (int i = 0; i < testTime; i++) {
+			int[] arr = randomArray(maxLen, maxValue);
+			int aim = (int) (Math.random() * maxValue);
+			int ans1 = coinWays(arr, aim);
+			int ans2 = dp(arr, aim);
+			if (ans1 != ans2) {
+				System.out.println("Oops!");
+				printArray(arr);
+				System.out.println(aim);
+				System.out.println(ans1);
+				System.out.println(ans2);
+				break;
+			}
+		}
+		System.out.println("测试结束");
+	}
+}
+```
+
+## 示例8
+
+arr是面值数组，其中的值都是正数且没有重复。再给定一个正数aim。每个值都认为是一种面值，且认为张数是无限的。返回组成aim的方法数。例如：arr=[1,2]，aim=4，那么方法如下：1+1+1+1、1+1+2、2+2；一共就3种方法，所以返回3
+
+```java
+package org.duo.master.chapter021;
+
+public class Code03_CoinsWayNoLimit {
+
+	public static int coinsWay(int[] arr, int aim) {
+		if (arr == null || arr.length == 0 || aim < 0) {
+			return 0;
+		}
+		return process(arr, 0, aim);
+	}
+
+	// arr[index....] 所有的面值，每一个面值都可以任意选择张数，组成正好rest这么多钱，方法数多少？
+	public static int process(int[] arr, int index, int rest) {
+		if (index == arr.length) { // 没钱了
+			return rest == 0 ? 1 : 0;
+		}
+		int ways = 0;
+		for (int zhang = 0; zhang * arr[index] <= rest; zhang++) {
+			ways += process(arr, index + 1, rest - (zhang * arr[index]));
+		}
+		return ways;
+	}
+
+	public static int dp1(int[] arr, int aim) {
+		if (arr == null || arr.length == 0 || aim < 0) {
+			return 0;
+		}
+		int N = arr.length;
+		int[][] dp = new int[N + 1][aim + 1];
+		dp[N][0] = 1;
+		for (int index = N - 1; index >= 0; index--) {
+			for (int rest = 0; rest <= aim; rest++) {
+				int ways = 0;
+				for (int zhang = 0; zhang * arr[index] <= rest; zhang++) {
+					ways += dp[index + 1][rest - (zhang * arr[index])];
+				}
+				dp[index][rest] = ways;
+			}
+		}
+		return dp[0][aim];
+	}
+
+	public static int dp2(int[] arr, int aim) {
+		if (arr == null || arr.length == 0 || aim < 0) {
+			return 0;
+		}
+		int N = arr.length;
+		int[][] dp = new int[N + 1][aim + 1];
+		dp[N][0] = 1;
+		for (int index = N - 1; index >= 0; index--) {
+			for (int rest = 0; rest <= aim; rest++) {
+				dp[index][rest] = dp[index + 1][rest];
+				if (rest - arr[index] >= 0) {
+					dp[index][rest] += dp[index][rest - arr[index]];
+				}
+			}
+		}
+		return dp[0][aim];
+	}
+
+	// 为了测试
+	public static int[] randomArray(int maxLen, int maxValue) {
+		int N = (int) (Math.random() * maxLen);
+		int[] arr = new int[N];
+		boolean[] has = new boolean[maxValue + 1];
+		for (int i = 0; i < N; i++) {
+			do {
+				arr[i] = (int) (Math.random() * maxValue) + 1;
+			} while (has[arr[i]]);
+			has[arr[i]] = true;
+		}
+		return arr;
+	}
+
+	// 为了测试
+	public static void printArray(int[] arr) {
+		for (int i = 0; i < arr.length; i++) {
+			System.out.print(arr[i] + " ");
+		}
+		System.out.println();
+	}
+
+	// 为了测试
+	public static void main(String[] args) {
+		int maxLen = 10;
+		int maxValue = 30;
+		int testTime = 1000000;
+		System.out.println("测试开始");
+		for (int i = 0; i < testTime; i++) {
+			int[] arr = randomArray(maxLen, maxValue);
+			int aim = (int) (Math.random() * maxValue);
+			int ans1 = coinsWay(arr, aim);
+			int ans2 = dp1(arr, aim);
+			int ans3 = dp2(arr, aim);
+			if (ans1 != ans2 || ans1 != ans3) {
+				System.out.println("Oops!");
+				printArray(arr);
+				System.out.println(aim);
+				System.out.println(ans1);
+				System.out.println(ans2);
+				System.out.println(ans3);
+				break;
+			}
+		}
+		System.out.println("测试结束");
+	}
+
+}
+```
+
