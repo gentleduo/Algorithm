@@ -2456,7 +2456,7 @@ public class Code02_SerializeAndReconstructTree {
 
 ## 搜索二叉树
 
-它或者是一棵空树，或者是具有下列性质的二叉树： 若它的左子树不空，则左子树上所有结点的值均小于它的根结点的值； 若它的右子树不空，则右子树上所有结点的值均大于它的根结点的值； 它的左、右子树也分别为二叉排序树。
+它或者是一棵空树，或者是具有下列性质的二叉树： 若它的左子树不空，则左子树上所有结点的值均小于它的根结点的值； 若它的右子树不空，则右子树上所有结点的值均大于它的根结点的值； 它的左、右子树也分别为二叉排序树。(搜索二叉树不接受重复的key)
 
 ```java
 package org.duo.master.chapter012;
@@ -6286,3 +6286,448 @@ public class Code04_AC2 {
    - 给三台服务器分配一定量的不同的字符串(比如1万个)，然后建立一张路由表，可以查到每台机器对应哪些字符串，同样哪个字符串属于哪台机器也可以查到。即m1有一万个虚拟节点，m2有一万个虚拟节点，m3有一万个虚拟节点；
    - 将虚拟节点哈希后的值标记在环上：即原来环上只有三台服务器哈希后的值，而现在每台服务器在环上会标记一万个值，而且由每个标记抢的位置分别属于三台服务器；
    - 这样就可以保证三台服务器抢到的位置趋向于均衡：足够多的哈希值分完之后可以保证环几乎被均分，如果一万个不够可以再扩大虚拟节点个数量。
+
+# 平衡搜索二叉树(AVL)
+
+平衡搜索二叉树是指一棵树先保证是搜索二叉树的情况下，再保证它的平衡性。所谓平衡性：假设所有数据量为N的话，树的最大高度也仅仅是LogN的水平。为什么不用哈希表（O(1)）？因为现实情况下在数据库里的操作是有联系的，比如范围查询。平衡搜索二叉树在增加和删除节点后通过左旋和右旋操作来保证树的平衡性，左旋和右旋（左旋和右旋都不会破坏原本的搜索性）。头结点往哪左边倒就是左旋，头结点往右边倒就是右旋。
+
+## 左旋
+
+左旋：先指定头结点，然后，头结点往左边倒，头结点的右孩子上来
+
+```mermaid
+graph TB
+  A((A))---T
+  A((A))---B((B))
+  B((B))---K
+  B((B))---C((C))
+  C((C))---S
+  C((C))---F
+```
+
+```mermaid
+graph TB
+  B((B))---A
+  B((B))---C
+  A((A))---T
+  A((A))---K
+  C((C))---S
+  C((C))---F
+```
+
+## 右旋
+
+右旋：头结点往右边倒，头结点的左孩子上来。
+
+```mermaid
+graph TB
+  A((A))---B((B))
+  A((A))---T
+  B((B))---C((C))
+  B((B))---K
+  C((C))---S
+  C((C))---F
+```
+
+```mermaid
+graph TB
+  B((B))---C((C))
+  B((B))---A
+  A((A))---K
+  A((A))---T
+  C((C))---S
+  C((C))---F
+```
+
+总结：经典的有序表有很多种实现方式，比如AVL树，SB树（size balance tree），红黑树等，但是不管是哪种平衡搜索二叉树，不管平衡性如何定义，底层让它们变平衡的方式只有左旋和右旋！
+
+## AVL树
+
+为什么要有AVL树，因为AVL树的平衡性会使得在树上玩增删改查的效率会更高！！！AVL树的平衡性：任何一个结点，|左树最大高度 - 右树最大高度| < 2
+
+搜索二叉树添加结点很容易，但是删除结点并不那么容易，在coding上都是要花费很大功夫的，搜索二叉树删除结点最麻烦的一种情况，就是要删除的结点既有左树，也有右树。 可以用要删除结点右树上的最左结点替换，也可以用左树上的最右结点替换。
+
+如下图：要删除的结点是X，找到X结点右树上最左边的结点a，覆盖X。这样，左右两边的搜索性都没有被破坏。因为在一课搜索二叉树中，a结点就是距离X结点最近且比它大的结点，这是搜索二叉树的性质。
+
+```mermaid
+graph TB
+    X((X))---Z
+    X((X))---Y((Y))
+    Y((Y))---b((b))
+    b((b))---a((a))
+```
+
+AVL树的添加，删除和查都跟搜索二叉树一样，只是在进行完了这些操作后，AVL树有自己平衡性的补充。
+
+## AVL树的平衡性
+
+那么AVL树如何调整平衡性？跟破坏AVL平衡性的类型有关。AVL树破坏平衡性的类型有如下四种（跟左旋和右旋无关）：以下是AVL树局部破坏平衡性的情况
+
+### LL型
+
+遇到LL型违规，做一次右旋即可恢复平衡性。
+
+```mermaid
+graph TD
+    3((3))---2((2))
+    2((2))---1((1))
+```
+
+```mermaid
+graph TD
+    2((2))---1((1))
+    2((2))---3((3))
+```
+
+### LR型
+
+遇到LR型违规，如下图，右树的高度比较小，左树的高度比较大，并且是由于左树的右树高度比较大，才破坏的平衡性。
+
+```mermaid
+graph TB
+    A((A))---B
+    A((A))---T
+    B((B))---K
+    B((B))---C((C))
+    C((C))---S
+    C((C))---F
+```
+
+调整办法：想办法让孙子替换爷爷，也就是说让C替换A。
+第一步：在以B为头结点的整棵树上做一次左旋，让C先往上走一步。
+
+```mermaid
+graph TB
+    A((A))---C
+    A((A))---T
+    C((C))---B((B))
+    C((C))---F
+    B((B))---K
+    B((B))---S
+```
+
+第二步：在以A为头结点的整棵树进行一次右旋，让C彻底来到头部。
+
+```mermaid
+graph TB
+    C((C))---B((B))
+    C((C))---A((A))
+    B((B))---K
+    B((B))---S
+    A((A))---F
+    A((A))---T
+```
+
+### RR型
+
+遇到RR型违规，做一次左旋即可恢复平衡性。
+
+### RL型
+
+RL型：想办法让孙子去到顶部，也就是说C结点替换A。（C就是孙）
+第一步：先在以B为头结点的整棵树玩一次右旋
+第二步：在以A为头结点整棵树玩一次左旋
+
+### 极端情况
+
+但是存在一种极端情况，既属于LL违规型，又属于LR违规型，则直接按照LL型标准来调整，直接右旋。同理，也会出现既是RL型违规和又是RR型违规。但是不会出现既是LL型，又是RR型。
+
+### AVL树的调整代价
+
+上述四种违规类型的调整代价都是很小的，O(1)。那么AVL树加入一个结点后，具体如何调整呢？是加入某个结点后，往上沿途每个结点都检查，看属于哪种违规类型。包括加入的结点。如果AVL树在加入结点之前的最大高度为LogN，那么加入一个结点后，即使往上所有结点都要检查是否违规，因为上面只有LogN个结点，而每个节点的调整代价为O(1)；所以，AVL树调整平衡性的代价就是O(LogN)。AVL树里，维持平衡的因子就是树的高度h，所以每一次结点相对位置调整完后，都要更新平衡因子h。如果别的树的平衡因子是另外的，也要这么做，比如红黑树，SB树等。
+
+### 有序表跟AVL树的关系
+
+如果将有序表比作成一个接口，那么AVL树就是一个具体的类，而可以实现有序表的还有SB树，红黑树，跳表，234树，B树，B+树…，它们实现有序表的时间复杂度都是O(LogN)。
+
+```java
+package org.duo.master.chapter035;
+
+public class Code01_AVLTreeMap {
+
+	/**
+	 * 因为AVL树是有序表里面用到的，所以必须要求它的key可比较
+	 * @param <K>
+	 * @param <V>
+	 */
+	public static class AVLNode<K extends Comparable<K>, V> {
+		public K k;
+		public V v;
+		// 指向左孩子和右孩子的结点
+		public AVLNode<K, V> l;
+		public AVLNode<K, V> r;
+		// AVL树中的平衡因子：高度（整棵AVL树的高度）
+		public int h;
+
+		public AVLNode(K key, V value) {
+			k = key;
+			v = value;
+			h = 1;
+		}
+	}
+
+	/**
+	 * 用AVL树实现的有序表
+	 * @param <K>
+	 * @param <V>
+	 */
+	public static class AVLTreeMap<K extends Comparable<K>, V> {
+
+		private AVLNode<K, V> root; // 整棵树的根结点
+		private int size; // 加入的key的个数
+
+		public AVLTreeMap() {
+			root = null;
+			size = 0;
+		}
+
+		// 针对cur结点整棵树右旋
+		private AVLNode<K, V> rightRotate(AVLNode<K, V> cur) {
+			// 先记住cur的左孩子，因为右旋是cur往右边倒
+			AVLNode<K, V> left = cur.l;
+			// 然后左孩子的右树挂在我的（cur）的左边
+			cur.l = left.r;
+			// 左孩子的右接管cur
+			left.r = cur;
+			// 调整cur和left的高度，并且一定要先调整cur的高度后再调整left，因为右旋后头结点是left了
+			cur.h = Math.max((cur.l != null ? cur.l.h : 0), (cur.r != null ? cur.r.h : 0)) + 1;
+			left.h = Math.max((left.l != null ? left.l.h : 0), (left.r != null ? left.r.h : 0)) + 1;
+			return left;
+		}
+
+		private AVLNode<K, V> leftRotate(AVLNode<K, V> cur) {
+			AVLNode<K, V> right = cur.r;
+			cur.r = right.l;
+			right.l = cur;
+			cur.h = Math.max((cur.l != null ? cur.l.h : 0), (cur.r != null ? cur.r.h : 0)) + 1;
+			right.h = Math.max((right.l != null ? right.l.h : 0), (right.r != null ? right.r.h : 0)) + 1;
+			return right;
+		}
+
+		private AVLNode<K, V> maintain(AVLNode<K, V> cur) {
+			if (cur == null) {
+				return null;
+			}
+			int leftHeight = cur.l != null ? cur.l.h : 0;
+			int rightHeight = cur.r != null ? cur.r.h : 0;
+			if (Math.abs(leftHeight - rightHeight) > 1) {
+				if (leftHeight > rightHeight) {
+					int leftLeftHeight = cur.l != null && cur.l.l != null ? cur.l.l.h : 0;
+					int leftRightHeight = cur.l != null && cur.l.r != null ? cur.l.r.h : 0;
+					// 既是LL型，又是LR型，按照LL型标准来调整平衡性，所以这里要大于等于
+					if (leftLeftHeight >= leftRightHeight) {
+						cur = rightRotate(cur);
+					} else {
+						cur.l = leftRotate(cur.l);
+						cur = rightRotate(cur);
+					}
+				} else {
+					int rightLeftHeight = cur.r != null && cur.r.l != null ? cur.r.l.h : 0;
+					int rightRightHeight = cur.r != null && cur.r.r != null ? cur.r.r.h : 0;
+					// 同理，如果既是RR型，又是RL型，按照RR型标准来调整平衡性
+					if (rightRightHeight >= rightLeftHeight) {
+						cur = leftRotate(cur);
+					} else {
+						cur.r = rightRotate(cur.r);
+						cur = leftRotate(cur);
+					}
+				}
+			}
+			return cur;
+		}
+
+		private AVLNode<K, V> findLastIndex(K key) {
+			AVLNode<K, V> pre = root;
+			AVLNode<K, V> cur = root;
+			while (cur != null) {
+				pre = cur;
+				if (key.compareTo(cur.k) == 0) {
+					break;
+				} else if (key.compareTo(cur.k) < 0) {
+					cur = cur.l;
+				} else {
+					cur = cur.r;
+				}
+			}
+			return pre;
+		}
+
+		private AVLNode<K, V> findLastNoSmallIndex(K key) {
+			AVLNode<K, V> ans = null;
+			AVLNode<K, V> cur = root;
+			while (cur != null) {
+				if (key.compareTo(cur.k) == 0) {
+					ans = cur;
+					break;
+				} else if (key.compareTo(cur.k) < 0) {
+					ans = cur;
+					cur = cur.l;
+				} else {
+					cur = cur.r;
+				}
+			}
+			return ans;
+		}
+
+		private AVLNode<K, V> findLastNoBigIndex(K key) {
+			AVLNode<K, V> ans = null;
+			AVLNode<K, V> cur = root;
+			while (cur != null) {
+				if (key.compareTo(cur.k) == 0) {
+					ans = cur;
+					break;
+				} else if (key.compareTo(cur.k) < 0) {
+					cur = cur.l;
+				} else {
+					ans = cur;
+					cur = cur.r;
+				}
+			}
+			return ans;
+		}
+
+		/**
+		 * 在以cur为头的整颗子树上，加记录，并且把整棵树的头结点返回， add()方法不会遇到相同的key
+		 * 搜索二叉树里不加重复的key，只要说搜索二叉树，它的潜台词就是每个key都不一样
+		 * @param cur
+		 * @param key
+		 * @param value
+		 * @return
+		 */
+		private AVLNode<K, V> add(AVLNode<K, V> cur, K key, V value) {
+			if (cur == null) {
+				return new AVLNode<K, V>(key, value);
+			} else {
+				if (key.compareTo(cur.k) < 0) {
+					cur.l = add(cur.l, key, value);
+				} else {
+					cur.r = add(cur.r, key, value);
+				}
+				cur.h = Math.max(cur.l != null ? cur.l.h : 0, cur.r != null ? cur.r.h : 0) + 1;
+				// 以上只是搜索二叉树的增加结点，加完结点后，调平衡
+				return maintain(cur);
+			}
+		}
+
+		// 在cur这棵树上，删掉key所代表的节点
+		// 返回cur这棵树的新头部
+		private AVLNode<K, V> delete(AVLNode<K, V> cur, K key) {
+			if (key.compareTo(cur.k) > 0) {
+				cur.r = delete(cur.r, key);
+			} else if (key.compareTo(cur.k) < 0) {
+				cur.l = delete(cur.l, key);
+			} else {
+				if (cur.l == null && cur.r == null) {
+					cur = null;
+				} else if (cur.l == null && cur.r != null) {
+					cur = cur.r;
+				} else if (cur.l != null && cur.r == null) {
+					cur = cur.l;
+					// 左右孩子都不为空的时候
+				} else {
+					// 找到右子树上的最左结点
+					AVLNode<K, V> des = cur.r;
+					while (des.l != null) {
+						des = des.l;
+					}
+					// 将得到的右子树上的最左结点，替换要删除的结点，
+					cur.r = delete(cur.r, des.k);
+					des.l = cur.l;
+					des.r = cur.r;
+					cur = des;
+				}
+			}
+			if (cur != null) {
+				cur.h = Math.max(cur.l != null ? cur.l.h : 0, cur.r != null ? cur.r.h : 0) + 1;
+			}
+			// 调整树的平衡性
+			return maintain(cur);
+		}
+
+		public int size() {
+			return size;
+		}
+
+		public boolean containsKey(K key) {
+			if (key == null) {
+				return false;
+			}
+			AVLNode<K, V> lastNode = findLastIndex(key);
+			return lastNode != null && key.compareTo(lastNode.k) == 0 ? true : false;
+		}
+
+		public void put(K key, V value) {
+			if (key == null) {
+				return;
+			}
+			AVLNode<K, V> lastNode = findLastIndex(key);
+			if (lastNode != null && key.compareTo(lastNode.k) == 0) {
+				lastNode.v = value;
+			} else {
+				size++;
+				root = add(root, key, value);
+			}
+		}
+
+		public void remove(K key) {
+			if (key == null) {
+				return;
+			}
+			if (containsKey(key)) {
+				size--;
+				root = delete(root, key);
+			}
+		}
+
+		public V get(K key) {
+			if (key == null) {
+				return null;
+			}
+			AVLNode<K, V> lastNode = findLastIndex(key);
+			if (lastNode != null && key.compareTo(lastNode.k) == 0) {
+				return lastNode.v;
+			}
+			return null;
+		}
+
+		public K firstKey() {
+			if (root == null) {
+				return null;
+			}
+			AVLNode<K, V> cur = root;
+			while (cur.l != null) {
+				cur = cur.l;
+			}
+			return cur.k;
+		}
+
+		public K lastKey() {
+			if (root == null) {
+				return null;
+			}
+			AVLNode<K, V> cur = root;
+			while (cur.r != null) {
+				cur = cur.r;
+			}
+			return cur.k;
+		}
+
+		public K floorKey(K key) {
+			if (key == null) {
+				return null;
+			}
+			AVLNode<K, V> lastNoBigNode = findLastNoBigIndex(key);
+			return lastNoBigNode == null ? null : lastNoBigNode.k;
+		}
+
+		public K ceilingKey(K key) {
+			if (key == null) {
+				return null;
+			}
+			AVLNode<K, V> lastNoSmallNode = findLastNoSmallIndex(key);
+			return lastNoSmallNode == null ? null : lastNoSmallNode.k;
+		}
+	}
+}
+```
+
