@@ -6731,3 +6731,616 @@ public class Code01_AVLTreeMap {
 }
 ```
 
+# SizeBalancedTree
+
+```java
+package org.duo.master.chapter036;
+
+public class Code01_SizeBalancedTreeMap {
+
+	public static class SBTNode<K extends Comparable<K>, V> {
+		public K key;
+		public V value;
+		public SBTNode<K, V> l;
+		public SBTNode<K, V> r;
+		public int size; // 不同的key的数量
+
+		public SBTNode(K key, V value) {
+			this.key = key;
+			this.value = value;
+			size = 1;
+		}
+	}
+
+	public static class SizeBalancedTreeMap<K extends Comparable<K>, V> {
+		private SBTNode<K, V> root;
+
+		private SBTNode<K, V> rightRotate(SBTNode<K, V> cur) {
+			SBTNode<K, V> leftNode = cur.l;
+			cur.l = leftNode.r;
+			leftNode.r = cur;
+			leftNode.size = cur.size;
+			cur.size = (cur.l != null ? cur.l.size : 0) + (cur.r != null ? cur.r.size : 0) + 1;
+			return leftNode;
+		}
+
+		private SBTNode<K, V> leftRotate(SBTNode<K, V> cur) {
+			SBTNode<K, V> rightNode = cur.r;
+			cur.r = rightNode.l;
+			rightNode.l = cur;
+			rightNode.size = cur.size;
+			cur.size = (cur.l != null ? cur.l.size : 0) + (cur.r != null ? cur.r.size : 0) + 1;
+			return rightNode;
+		}
+
+		private SBTNode<K, V> maintain(SBTNode<K, V> cur) {
+			if (cur == null) {
+				return null;
+			}
+			int leftSize = cur.l != null ? cur.l.size : 0;
+			int leftLeftSize = cur.l != null && cur.l.l != null ? cur.l.l.size : 0;
+			int leftRightSize = cur.l != null && cur.l.r != null ? cur.l.r.size : 0;
+			int rightSize = cur.r != null ? cur.r.size : 0;
+			int rightLeftSize = cur.r != null && cur.r.l != null ? cur.r.l.size : 0;
+			int rightRightSize = cur.r != null && cur.r.r != null ? cur.r.r.size : 0;
+			if (leftLeftSize > rightSize) {
+				cur = rightRotate(cur);
+				cur.r = maintain(cur.r);
+				cur = maintain(cur);
+			} else if (leftRightSize > rightSize) {
+				cur.l = leftRotate(cur.l);
+				cur = rightRotate(cur);
+				cur.l = maintain(cur.l);
+				cur.r = maintain(cur.r);
+				cur = maintain(cur);
+			} else if (rightRightSize > leftSize) {
+				cur = leftRotate(cur);
+				cur.l = maintain(cur.l);
+				cur = maintain(cur);
+			} else if (rightLeftSize > leftSize) {
+				cur.r = rightRotate(cur.r);
+				cur = leftRotate(cur);
+				cur.l = maintain(cur.l);
+				cur.r = maintain(cur.r);
+				cur = maintain(cur);
+			}
+			return cur;
+		}
+
+		private SBTNode<K, V> findLastIndex(K key) {
+			SBTNode<K, V> pre = root;
+			SBTNode<K, V> cur = root;
+			while (cur != null) {
+				pre = cur;
+				if (key.compareTo(cur.key) == 0) {
+					break;
+				} else if (key.compareTo(cur.key) < 0) {
+					cur = cur.l;
+				} else {
+					cur = cur.r;
+				}
+			}
+			return pre;
+		}
+
+		private SBTNode<K, V> findLastNoSmallIndex(K key) {
+			SBTNode<K, V> ans = null;
+			SBTNode<K, V> cur = root;
+			while (cur != null) {
+				if (key.compareTo(cur.key) == 0) {
+					ans = cur;
+					break;
+				} else if (key.compareTo(cur.key) < 0) {
+					ans = cur;
+					cur = cur.l;
+				} else {
+					cur = cur.r;
+				}
+			}
+			return ans;
+		}
+
+		private SBTNode<K, V> findLastNoBigIndex(K key) {
+			SBTNode<K, V> ans = null;
+			SBTNode<K, V> cur = root;
+			while (cur != null) {
+				if (key.compareTo(cur.key) == 0) {
+					ans = cur;
+					break;
+				} else if (key.compareTo(cur.key) < 0) {
+					cur = cur.l;
+				} else {
+					ans = cur;
+					cur = cur.r;
+				}
+			}
+			return ans;
+		}
+
+		// 现在，以cur为头的树上，新增，加(key, value)这样的记录
+		// 加完之后，会对cur做检查，该调整调整
+		// 返回，调整完之后，整棵树的新头部
+		private SBTNode<K, V> add(SBTNode<K, V> cur, K key, V value) {
+			if (cur == null) {
+				return new SBTNode<K, V>(key, value);
+			} else {
+				cur.size++;
+				if (key.compareTo(cur.key) < 0) {
+					cur.l = add(cur.l, key, value);
+				} else {
+					cur.r = add(cur.r, key, value);
+				}
+				return maintain(cur);
+			}
+		}
+
+		// 在cur这棵树上，删掉key所代表的节点
+		// 返回cur这棵树的新头部
+		private SBTNode<K, V> delete(SBTNode<K, V> cur, K key) {
+			cur.size--;
+			if (key.compareTo(cur.key) > 0) {
+				cur.r = delete(cur.r, key);
+			} else if (key.compareTo(cur.key) < 0) {
+				cur.l = delete(cur.l, key);
+			} else { // 当前要删掉cur
+				if (cur.l == null && cur.r == null) {
+					// free cur memory -> C++
+					cur = null;
+				} else if (cur.l == null && cur.r != null) {
+					// free cur memory -> C++
+					cur = cur.r;
+				} else if (cur.l != null && cur.r == null) {
+					// free cur memory -> C++
+					cur = cur.l;
+				} else { // 有左有右
+					SBTNode<K, V> pre = null;
+					SBTNode<K, V> des = cur.r;
+					des.size--;
+					while (des.l != null) {
+						pre = des;
+						des = des.l;
+						des.size--;
+					}
+					if (pre != null) {
+						pre.l = des.r;
+						des.r = cur.r;
+					}
+					des.l = cur.l;
+					des.size = des.l.size + (des.r == null ? 0 : des.r.size) + 1;
+					// free cur memory -> C++
+					cur = des;
+				}
+			}
+			// cur = maintain(cur);
+			return cur;
+		}
+
+		private SBTNode<K, V> getIndex(SBTNode<K, V> cur, int kth) {
+			if (kth == (cur.l != null ? cur.l.size : 0) + 1) {
+				return cur;
+			} else if (kth <= (cur.l != null ? cur.l.size : 0)) {
+				return getIndex(cur.l, kth);
+			} else {
+				return getIndex(cur.r, kth - (cur.l != null ? cur.l.size : 0) - 1);
+			}
+		}
+
+		public int size() {
+			return root == null ? 0 : root.size;
+		}
+
+		public boolean containsKey(K key) {
+			if (key == null) {
+				throw new RuntimeException("invalid parameter.");
+			}
+			SBTNode<K, V> lastNode = findLastIndex(key);
+			return lastNode != null && key.compareTo(lastNode.key) == 0 ? true : false;
+		}
+
+		// （key，value） put -> 有序表 新增、改value
+		public void put(K key, V value) {
+			if (key == null) {
+				throw new RuntimeException("invalid parameter.");
+			}
+			SBTNode<K, V> lastNode = findLastIndex(key);
+			if (lastNode != null && key.compareTo(lastNode.key) == 0) {
+				lastNode.value = value;
+			} else {
+				root = add(root, key, value);
+			}
+		}
+
+		public void remove(K key) {
+			if (key == null) {
+				throw new RuntimeException("invalid parameter.");
+			}
+			if (containsKey(key)) {
+				root = delete(root, key);
+			}
+		}
+
+		public K getIndexKey(int index) {
+			if (index < 0 || index >= this.size()) {
+				throw new RuntimeException("invalid parameter.");
+			}
+			return getIndex(root, index + 1).key;
+		}
+
+		public V getIndexValue(int index) {
+			if (index < 0 || index >= this.size()) {
+				throw new RuntimeException("invalid parameter.");
+			}
+			return getIndex(root, index + 1).value;
+		}
+
+		public V get(K key) {
+			if (key == null) {
+				throw new RuntimeException("invalid parameter.");
+			}
+			SBTNode<K, V> lastNode = findLastIndex(key);
+			if (lastNode != null && key.compareTo(lastNode.key) == 0) {
+				return lastNode.value;
+			} else {
+				return null;
+			}
+		}
+
+		public K firstKey() {
+			if (root == null) {
+				return null;
+			}
+			SBTNode<K, V> cur = root;
+			while (cur.l != null) {
+				cur = cur.l;
+			}
+			return cur.key;
+		}
+
+		public K lastKey() {
+			if (root == null) {
+				return null;
+			}
+			SBTNode<K, V> cur = root;
+			while (cur.r != null) {
+				cur = cur.r;
+			}
+			return cur.key;
+		}
+
+		public K floorKey(K key) {
+			if (key == null) {
+				throw new RuntimeException("invalid parameter.");
+			}
+			SBTNode<K, V> lastNoBigNode = findLastNoBigIndex(key);
+			return lastNoBigNode == null ? null : lastNoBigNode.key;
+		}
+
+		public K ceilingKey(K key) {
+			if (key == null) {
+				throw new RuntimeException("invalid parameter.");
+			}
+			SBTNode<K, V> lastNoSmallNode = findLastNoSmallIndex(key);
+			return lastNoSmallNode == null ? null : lastNoSmallNode.key;
+		}
+
+	}
+
+	// for test
+	public static void printAll(SBTNode<String, Integer> head) {
+		System.out.println("Binary Tree:");
+		printInOrder(head, 0, "H", 17);
+		System.out.println();
+	}
+
+	// for test
+	public static void printInOrder(SBTNode<String, Integer> head, int height, String to, int len) {
+		if (head == null) {
+			return;
+		}
+		printInOrder(head.r, height + 1, "v", len);
+		String val = to + "(" + head.key + "," + head.value + ")" + to;
+		int lenM = val.length();
+		int lenL = (len - lenM) / 2;
+		int lenR = len - lenM - lenL;
+		val = getSpace(lenL) + val + getSpace(lenR);
+		System.out.println(getSpace(height * len) + val);
+		printInOrder(head.l, height + 1, "^", len);
+	}
+
+	// for test
+	public static String getSpace(int num) {
+		String space = " ";
+		StringBuffer buf = new StringBuffer("");
+		for (int i = 0; i < num; i++) {
+			buf.append(space);
+		}
+		return buf.toString();
+	}
+
+	public static void main(String[] args) {
+		SizeBalancedTreeMap<String, Integer> sbt = new SizeBalancedTreeMap<String, Integer>();
+		sbt.put("d", 4);
+		sbt.put("c", 3);
+		sbt.put("a", 1);
+		sbt.put("b", 2);
+		// sbt.put("e", 5);
+		sbt.put("g", 7);
+		sbt.put("f", 6);
+		sbt.put("h", 8);
+		sbt.put("i", 9);
+		sbt.put("a", 111);
+		System.out.println(sbt.get("a"));
+		sbt.put("a", 1);
+		System.out.println(sbt.get("a"));
+		for (int i = 0; i < sbt.size(); i++) {
+			System.out.println(sbt.getIndexKey(i) + " , " + sbt.getIndexValue(i));
+		}
+		printAll(sbt.root);
+		System.out.println(sbt.firstKey());
+		System.out.println(sbt.lastKey());
+		System.out.println(sbt.floorKey("g"));
+		System.out.println(sbt.ceilingKey("g"));
+		System.out.println(sbt.floorKey("e"));
+		System.out.println(sbt.ceilingKey("e"));
+		System.out.println(sbt.floorKey(""));
+		System.out.println(sbt.ceilingKey(""));
+		System.out.println(sbt.floorKey("j"));
+		System.out.println(sbt.ceilingKey("j"));
+		sbt.remove("d");
+		printAll(sbt.root);
+		sbt.remove("f");
+		printAll(sbt.root);
+	}
+}
+```
+
+# SkipList
+
+```java
+package org.duo.master.chapter036;
+
+import java.util.ArrayList;
+
+public class Code02_SkipListMap {
+
+	// 跳表的节点定义
+	public static class SkipListNode<K extends Comparable<K>, V> {
+		public K key;
+		public V val;
+		public ArrayList<SkipListNode<K, V>> nextNodes;
+
+		public SkipListNode(K k, V v) {
+			key = k;
+			val = v;
+			nextNodes = new ArrayList<SkipListNode<K, V>>();
+		}
+
+		// 遍历的时候，如果是往右遍历到的null(next == null), 遍历结束
+		// 头(null), 头节点的null，认为最小
+		// node  -> 头，node(null, "")  node.isKeyLess(!null)  true
+		// node里面的key是否比otherKey小，true，不是false
+		public boolean isKeyLess(K otherKey) {
+			//  otherKey == null -> false 
+			return otherKey != null && (key == null || key.compareTo(otherKey) < 0);
+		}
+
+		public boolean isKeyEqual(K otherKey) {
+			return (key == null && otherKey == null)
+					|| (key != null && otherKey != null && key.compareTo(otherKey) == 0);
+		}
+
+	}
+
+	public static class SkipListMap<K extends Comparable<K>, V> {
+		private static final double PROBABILITY = 0.5; // < 0.5 继续做，>=0.5 停
+		private SkipListNode<K, V> head;
+		private int size;
+		private int maxLevel;
+
+		public SkipListMap() {
+			head = new SkipListNode<K, V>(null, null);
+			head.nextNodes.add(null); // 0
+			size = 0;
+			maxLevel = 0;
+		}
+
+		// 从最高层开始，一路找下去，
+		// 最终，找到第0层的<key的最右的节点
+		private SkipListNode<K, V> mostRightLessNodeInTree(K key) {
+			if (key == null) {
+				return null;
+			}
+			int level = maxLevel;
+			SkipListNode<K, V> cur = head;
+			while (level >= 0) { // 从上层跳下层
+				//  cur  level  -> level-1
+				cur = mostRightLessNodeInLevel(key, cur, level--);
+			}
+			return cur;
+		}
+
+		// 在level层里，如何往右移动
+		// 现在来到的节点是cur，来到了cur的level层，在level层上，找到<key最后一个节点并返回
+		private SkipListNode<K, V> mostRightLessNodeInLevel(K key, 
+				SkipListNode<K, V> cur, 
+				int level) {
+			SkipListNode<K, V> next = cur.nextNodes.get(level);
+			while (next != null && next.isKeyLess(key)) {
+				cur = next;
+				next = cur.nextNodes.get(level);
+			}
+			return cur;
+		}
+
+		public boolean containsKey(K key) {
+			if (key == null) {
+				return false;
+			}
+			SkipListNode<K, V> less = mostRightLessNodeInTree(key);
+			SkipListNode<K, V> next = less.nextNodes.get(0);
+			return next != null && next.isKeyEqual(key);
+		}
+
+		// 新增、改value
+		public void put(K key, V value) {
+			if (key == null) {
+				return;
+			}
+			// 0层上，最右一个，< key 的Node -> >key
+			SkipListNode<K, V> less = mostRightLessNodeInTree(key);
+			SkipListNode<K, V> find = less.nextNodes.get(0);
+			if (find != null && find.isKeyEqual(key)) {
+				find.val = value;
+			} else { // find == null   8   7   9
+				size++;
+				int newNodeLevel = 0;
+				while (Math.random() < PROBABILITY) {
+					newNodeLevel++;
+				}
+				// newNodeLevel
+				while (newNodeLevel > maxLevel) {
+					head.nextNodes.add(null);
+					maxLevel++;
+				}
+				SkipListNode<K, V> newNode = new SkipListNode<K, V>(key, value);
+				for (int i = 0; i <= newNodeLevel; i++) {
+					newNode.nextNodes.add(null);
+				}
+				int level = maxLevel;
+				SkipListNode<K, V> pre = head;
+				while (level >= 0) {
+					// level 层中，找到最右的 < key 的节点
+					pre = mostRightLessNodeInLevel(key, pre, level);
+					if (level <= newNodeLevel) {
+						newNode.nextNodes.set(level, pre.nextNodes.get(level));
+						pre.nextNodes.set(level, newNode);
+					}
+					level--;
+				}
+			}
+		}
+
+		public V get(K key) {
+			if (key == null) {
+				return null;
+			}
+			SkipListNode<K, V> less = mostRightLessNodeInTree(key);
+			SkipListNode<K, V> next = less.nextNodes.get(0);
+			return next != null && next.isKeyEqual(key) ? next.val : null;
+		}
+
+		public void remove(K key) {
+			if (containsKey(key)) {
+				size--;
+				int level = maxLevel;
+				SkipListNode<K, V> pre = head;
+				while (level >= 0) {
+					pre = mostRightLessNodeInLevel(key, pre, level);
+					SkipListNode<K, V> next = pre.nextNodes.get(level);
+					// 1）在这一层中，pre下一个就是key
+					// 2）在这一层中，pre的下一个key是>要删除key
+					if (next != null && next.isKeyEqual(key)) {
+						// free delete node memory -> C++
+						// level : pre -> next(key) -> ...
+						pre.nextNodes.set(level, next.nextNodes.get(level));
+					}
+					// 在level层只有一个节点了，就是默认节点head
+					if (level != 0 && pre == head && pre.nextNodes.get(level) == null) {
+						head.nextNodes.remove(level);
+						maxLevel--;
+					}
+					level--;
+				}
+			}
+		}
+
+		public K firstKey() {
+			return head.nextNodes.get(0) != null ? head.nextNodes.get(0).key : null;
+		}
+
+		public K lastKey() {
+			int level = maxLevel;
+			SkipListNode<K, V> cur = head;
+			while (level >= 0) {
+				SkipListNode<K, V> next = cur.nextNodes.get(level);
+				while (next != null) {
+					cur = next;
+					next = cur.nextNodes.get(level);
+				}
+				level--;
+			}
+			return cur.key;
+		}
+
+		public K ceilingKey(K key) {
+			if (key == null) {
+				return null;
+			}
+			SkipListNode<K, V> less = mostRightLessNodeInTree(key);
+			SkipListNode<K, V> next = less.nextNodes.get(0);
+			return next != null ? next.key : null;
+		}
+
+		public K floorKey(K key) {
+			if (key == null) {
+				return null;
+			}
+			SkipListNode<K, V> less = mostRightLessNodeInTree(key);
+			SkipListNode<K, V> next = less.nextNodes.get(0);
+			return next != null && next.isKeyEqual(key) ? next.key : less.key;
+		}
+
+		public int size() {
+			return size;
+		}
+
+	}
+
+	// for test
+	public static void printAll(SkipListMap<String, String> obj) {
+		for (int i = obj.maxLevel; i >= 0; i--) {
+			System.out.print("Level " + i + " : ");
+			SkipListNode<String, String> cur = obj.head;
+			while (cur.nextNodes.get(i) != null) {
+				SkipListNode<String, String> next = cur.nextNodes.get(i);
+				System.out.print("(" + next.key + " , " + next.val + ") ");
+				cur = next;
+			}
+			System.out.println();
+		}
+	}
+
+	public static void main(String[] args) {
+		SkipListMap<String, String> test = new SkipListMap<>();
+		printAll(test);
+		System.out.println("======================");
+		test.put("A", "10");
+		printAll(test);
+		System.out.println("======================");
+		test.remove("A");
+		printAll(test);
+		System.out.println("======================");
+		test.put("E", "E");
+		test.put("B", "B");
+		test.put("A", "A");
+		test.put("F", "F");
+		test.put("C", "C");
+		test.put("D", "D");
+		printAll(test);
+		System.out.println("======================");
+		System.out.println(test.containsKey("B"));
+		System.out.println(test.containsKey("Z"));
+		System.out.println(test.firstKey());
+		System.out.println(test.lastKey());
+		System.out.println(test.floorKey("D"));
+		System.out.println(test.ceilingKey("D"));
+		System.out.println("======================");
+		test.remove("D");
+		printAll(test);
+		System.out.println("======================");
+		System.out.println(test.floorKey("D"));
+		System.out.println(test.ceilingKey("D"));
+	}
+}
+```
+
