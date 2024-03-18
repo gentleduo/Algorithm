@@ -48,15 +48,18 @@ public class BitOperation {
         System.out.println(toBinary(~a));
         System.out.println("================================");
         // 左移，正数和负数都一样（不区分带符号左移和不带符号左移）
+        // 将一个数对应的二进制表示整体左移，不考虑符号位，左边超出的部分舍弃，右边补零。
         System.out.println(-1 << 2);
         // 右移分带符号右移和不带符号右移，正数的带符号右移和不带符号右移是一样的
         System.out.println(Integer.MIN_VALUE);
         System.out.println(toBinary(Integer.MIN_VALUE));
         // 负数的带符号位右移：高位补符号位
+        // 将一个数对应的二进制表示整体右移，考虑符号位，左边的用原有符号位补充，右边超出的部分舍弃。
         System.out.println("============负数带符号右移========>");
         System.out.println(Integer.MIN_VALUE >> 1);
         System.out.println(toBinary(Integer.MIN_VALUE >> 1));
         // 负数的不带符号位右移：高位补0
+        // 将一个数的二进制表示整体右移，不考虑符号位，左边部分总是以0填充，右边部分舍弃。
         System.out.println("============负数不带符号右移======>");
         System.out.println(Integer.MIN_VALUE >>> 1);
         System.out.println(toBinary(Integer.MIN_VALUE >>> 1));
